@@ -167,6 +167,88 @@
             </div>
         </div>
     </div>
+
+    <!-- Create User Modal -->
+    <div x-show="showCreateModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showCreateModal = false">
+        <div class="bg-gray-900 rounded-lg border border-gray-700 max-w-md w-full mx-4 shadow-xl">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700">
+                <h3 class="text-lg font-semibold text-white">Add New User</h3>
+                <button @click="showCreateModal = false" class="text-gray-400 hover:text-white transition-colors">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="px-6 py-4 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
+                    <input type="text" 
+                           x-model="createForm.name"
+                           placeholder="Enter full name"
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email *</label>
+                    <input type="email" 
+                           x-model="createForm.email"
+                           placeholder="Enter email address"
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+                    <input type="tel" 
+                           x-model="createForm.phone"
+                           placeholder="Enter phone number"
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                    <input type="text" 
+                           x-model="createForm.location"
+                           placeholder="Enter location"
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Role *</label>
+                    <select x-model="createForm.role" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-red-500 focus:ring-1 focus:ring-red-500">
+                        <option value="">Select a role</option>
+                        <option value="buyer">Buyer</option>
+                        <option value="seller">Seller</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Status *</label>
+                    <select x-model="createForm.is_active" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-red-500 focus:ring-1 focus:ring-red-500">
+                        <option value="">Select a status</option>
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                </div>
+                
+                <div x-show="createForm.error" class="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                    <span x-text="createForm.error"></span>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-700">
+                <button @click="showCreateModal = false" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button @click="createUser()" :disabled="createForm.loading" class="px-4 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2">
+                    <span x-show="!createForm.loading">Create User</span>
+                    <span x-show="createForm.loading">Creating...</span>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -181,6 +263,16 @@ function userManagement() {
         status: '',
         role: '',
         showCreateModal: false,
+        createForm: {
+            name: '',
+            email: '',
+            phone: '',
+            location: '',
+            role: '',
+            is_active: '',
+            loading: false,
+            error: ''
+        },
         
         async fetchUsers() {
             try {
@@ -248,6 +340,81 @@ function userManagement() {
             if (this.page < this.pagination.total_pages) {
                 this.page++;
                 this.fetchUsers();
+            }
+        },
+        
+        async createUser() {
+            this.createForm.error = '';
+            
+            if (!this.createForm.name.trim()) {
+                this.createForm.error = 'Full name is required';
+                return;
+            }
+            
+            if (!this.createForm.email.trim()) {
+                this.createForm.error = 'Email is required';
+                return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(this.createForm.email)) {
+                this.createForm.error = 'Please enter a valid email address';
+                return;
+            }
+            
+            if (!this.createForm.role) {
+                this.createForm.error = 'Role is required';
+                return;
+            }
+            
+            if (this.createForm.is_active === '') {
+                this.createForm.error = 'Status is required';
+                return;
+            }
+            
+            this.createForm.loading = true;
+            
+            try {
+                const response = await fetch('/api/admin/users/create', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: this.createForm.name,
+                        email: this.createForm.email,
+                        phone: this.createForm.phone || null,
+                        location: this.createForm.location || null,
+                        role: this.createForm.role,
+                        is_active: parseInt(this.createForm.is_active)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.showCreateModal = false;
+                    this.createForm = {
+                        name: '',
+                        email: '',
+                        phone: '',
+                        location: '',
+                        role: '',
+                        is_active: '',
+                        loading: false,
+                        error: ''
+                    };
+                    this.fetchUsers();
+                } else {
+                    this.createForm.error = data.message || 'Failed to create user';
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+                this.createForm.error = 'An error occurred while creating the user';
+            } finally {
+                this.createForm.loading = false;
             }
         },
         
