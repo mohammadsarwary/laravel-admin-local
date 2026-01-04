@@ -26,6 +26,7 @@
         <!-- Login Card -->
         <div class="bg-gray-900 rounded-lg border border-gray-700 p-8 shadow-2xl">
             <form id="loginForm" class="space-y-6">
+                @csrf
                 <!-- Email -->
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
@@ -113,6 +114,10 @@
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
             const loadingMessage = document.getElementById('loadingMessage');
+            
+            // Get CSRF token from meta tag or form
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
+                             document.querySelector('input[name="_token"]')?.value;
 
             errorMessage.classList.add('hidden');
             loadingMessage.classList.remove('hidden');
@@ -123,6 +128,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
                     },
                     body: JSON.stringify({ email, password })
                 });
