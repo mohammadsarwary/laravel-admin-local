@@ -13,31 +13,43 @@ class AdminMiddleware
         $user = $request->user();
 
         if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Authentication required',
-            ], 401);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Authentication required',
+                ], 401);
+            }
+            return redirect()->route('login');
         }
 
         if (!$user->is_admin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Admin access required',
-            ], 403);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Admin access required',
+                ], 403);
+            }
+            return redirect()->route('login')->with('error', 'Admin access required');
         }
 
         if (!$user->is_active) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Account is deactivated',
-            ], 403);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Account is deactivated',
+                ], 403);
+            }
+            return redirect()->route('login')->with('error', 'Account is deactivated');
         }
 
         if ($role && !$user->hasAdminRole($role)) {
-            return response()->json([
-                'success' => false,
-                'message' => "Insufficient permissions. {$role} role required.",
-            ], 403);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Insufficient permissions. {$role} role required.",
+                ], 403);
+            }
+            return redirect()->route('login')->with('error', "Insufficient permissions. {$role} role required.");
         }
 
         return $next($request);

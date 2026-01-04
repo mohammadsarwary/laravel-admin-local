@@ -11,11 +11,11 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate(
-            ['email' => 'admin@marketlocal.com'],
+            ['email' => 'admin@bazarino.store'],
             [
                 'name' => 'Super Admin',
-                'email' => 'admin@marketlocal.com',
-                'password' => Hash::make('admin123'),
+                'email' => 'admin@bazarino.store',
+                'password' => Hash::make('password'),
                 'is_admin' => true,
                 'admin_role' => 'super_admin',
                 'is_verified' => true,
@@ -25,11 +25,11 @@ class AdminUserSeeder extends Seeder
         );
 
         User::firstOrCreate(
-            ['email' => 'moderator@marketlocal.com'],
+            ['email' => 'moderator@bazarino.store'],
             [
                 'name' => 'Moderator',
-                'email' => 'moderator@marketlocal.com',
-                'password' => Hash::make('moderator123'),
+                'email' => 'moderator@bazarino.store',
+                'password' => Hash::make('password'),
                 'is_admin' => true,
                 'admin_role' => 'moderator',
                 'is_verified' => true,
