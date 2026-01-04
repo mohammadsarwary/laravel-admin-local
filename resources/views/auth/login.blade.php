@@ -136,8 +136,19 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    // Store token
+                    // Store token in localStorage for API calls
                     localStorage.setItem('admin_token', data.data.token);
+                    
+                    // Create a session by posting token to a session endpoint
+                    await fetch('/admin/set-session', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({ token: data.data.token })
+                    });
                     
                     // Redirect to dashboard
                     window.location.href = '/admin/dashboard';
