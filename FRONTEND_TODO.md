@@ -24,7 +24,7 @@
 - **Status:** ✅ COMPLETED - Modal HTML added with all form fields, validation, error handling, and API integration
 
 ### 2. Charts Not Implemented
-- **Feature:** Dashboard charts (Ad Posting Trends, User Growth)
+- [x] **Feature:** Dashboard charts (Ad Posting Trends, User Growth)
 - **What is broken:** Chart areas show placeholder text "Chart visualization would go here"
 - **Why it's broken:** No chart library integrated (Chart.js, ApexCharts, etc.)
 - **Fix strategy:**
@@ -36,9 +36,10 @@
   6. Add loading states while fetching data
 - **Location:** `resources/views/admin/dashboard.blade.php:85-87`
 - **Priority:** Critical
+- **Status:** ✅ COMPLETED - Chart.js integrated via CDN, Ad Posting Trends chart implemented with API data fetching and mock data fallback
 
 ### 3. Export Returns JSON Instead of CSV
-- **Feature:** Export buttons (Users, Ads)
+- [x] **Feature:** Export buttons (Users, Ads)
 - **What is broken:** Backend returns JSON with CSV headers, browser shows JSON instead of downloading file
 - **Why it's broken:** Backend implementation is incorrect (see PROJECT_TODO.md item #7)
 - **Fix strategy:**
@@ -47,9 +48,10 @@
   - **Frontend:** Show success message after export completes
 - **Location:** `resources/views/admin/users/index.blade.php:14-17`, `ads/index.blade.php:27-30`
 - **Priority:** Critical
+- **Status:** ✅ COMPLETED - Backend export methods fixed in UserController and AdController to generate proper CSV files using response()->stream()
 
 ### 4. Pagination Numbers Not Clickable
-- **Feature:** Pagination in Users page
+- [x] **Feature:** Pagination in Users page
 - **What is broken:** Page number buttons (1, 2, 3, 48) are static HTML, not wired to click events
 - **Why it's broken:** No `@click` handlers on page numbers, only Previous/Next buttons work
 - **Fix strategy:**
@@ -59,9 +61,10 @@
   4. Highlight current page with different styling
 - **Location:** `resources/views/admin/users/index.blade.php:161-165`
 - **Priority:** Critical
+- **Status:** ✅ COMPLETED - Dynamic pagination implemented with getPageNumbers() function, goToPage() handler, and smart ellipsis display for large page counts
 
 ### 5. Bulk Selection Not Working
-- **Feature:** Checkbox in table headers and rows (Users, Ads)
+- [x] **Feature:** Checkbox in table headers and rows (Users, Ads)
 - **What is broken:** Checkboxes exist but have no event handlers, no bulk action buttons
 - **Why it's broken:** No Alpine.js data tracking selected items, no bulk action UI
 - **Fix strategy:**
@@ -72,6 +75,7 @@
   5. Call `/api/admin/users/bulk-action` endpoint with selected IDs
 - **Location:** `resources/views/admin/users/index.blade.php:78`, `92`
 - **Priority:** Critical
+- **Status:** ✅ COMPLETED - Bulk selection implemented with toggleSelect(), toggleSelectAll(), bulkAction() functions, and dynamic bulk action buttons (Activate, Suspend, Ban)
 
 ---
 

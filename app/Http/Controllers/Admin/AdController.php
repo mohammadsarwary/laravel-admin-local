@@ -194,7 +194,7 @@ class AdController extends Controller
         return $this->success(null, count($adIds) . ' ads updated successfully');
     }
 
-    public function export(): JsonResponse
+    public function export()
     {
         $ads = Ad::with(['user:id,name', 'category:id,name'])
             ->select([
@@ -202,22 +202,36 @@ class AdController extends Controller
                 'views', 'user_id', 'category_id', 'created_at'
             ])
             ->orderByDesc('created_at')
-            ->get()
-            ->map(fn($ad) => [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'price' => $ad->price,
-                'condition' => $ad->condition,
-                'location' => $ad->location,
-                'status' => $ad->status,
-                'views' => $ad->views,
-                'user_name' => $ad->user?->name,
-                'category_name' => $ad->category?->name,
-                'created_at' => $ad->created_at,
-            ]);
+            ->get();
 
-        return response()->json($ads)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="ads_export_' . date('Y-m-d') . '.csv"');
+        $headers = ['ID', 'Title', 'Price', 'Condition', 'Location', 'Status', 'Views', 'User Name', 'Category Name', 'Created At'];
+        
+        $callback = function() use ($ads, $headers) {
+            $file = fopen('php://output', 'w');
+            
+            fputcsv($file, $headers);
+            
+            foreach ($ads as $ad) {
+                fputcsv($file, [
+                    $ad->id,
+                    $ad->title,
+                    $ad->price,
+                    $ad->condition,
+                    $ad->location,
+                    $ad->status,
+                    $ad->views,
+                    $ad->user?->name,
+                    $ad->category?->name,
+                    $ad->created_at,
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="ads_export_' . date('Y-m-d') . '.csv"',
+        ]);
     }
 }

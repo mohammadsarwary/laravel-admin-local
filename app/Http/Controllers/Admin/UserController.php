@@ -228,7 +228,7 @@ class UserController extends Controller
         return $this->success($activity);
     }
 
-    public function export(): JsonResponse
+    public function export()
     {
         $users = User::select([
             'id', 'name', 'email', 'phone', 'location', 'rating',
@@ -237,8 +237,34 @@ class UserController extends Controller
         ->orderByDesc('created_at')
         ->get();
 
-        return response()->json($users)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="users_export_' . date('Y-m-d') . '.csv"');
+        $headers = ['ID', 'Name', 'Email', 'Phone', 'Location', 'Rating', 'Active Listings', 'Verified', 'Active', 'Created At'];
+        
+        $callback = function() use ($users, $headers) {
+            $file = fopen('php://output', 'w');
+            
+            fputcsv($file, $headers);
+            
+            foreach ($users as $user) {
+                fputcsv($file, [
+                    $user->id,
+                    $user->name,
+                    $user->email,
+                    $user->phone,
+                    $user->location,
+                    $user->rating,
+                    $user->active_listings,
+                    $user->is_verified ? 'Yes' : 'No',
+                    $user->is_active ? 'Yes' : 'No',
+                    $user->created_at,
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="users_export_' . date('Y-m-d') . '.csv"',
+        ]);
     }
 }

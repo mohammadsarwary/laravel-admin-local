@@ -44,28 +44,46 @@
 
     <!-- Filters -->
     <div class="card-dark rounded-lg p-4 border border-gray-700 mb-6">
-        <div class="flex flex-wrap gap-4 items-center">
-            <div class="flex-1 min-w-64">
-                <input type="text" 
-                       x-model="search" 
-                       @input.debounce.300ms="fetchUsers()"
-                       placeholder="Search by name, email, or phone..."
-                       class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+        <div class="flex flex-wrap gap-4 items-center justify-between">
+            <div class="flex flex-wrap gap-4 items-center">
+                <div class="flex-1 min-w-64">
+                    <input type="text" 
+                           x-model="search" 
+                           @input.debounce.300ms="fetchUsers()"
+                           placeholder="Search by name, email, or phone..."
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+                </div>
+                
+                <select x-model="status" @change="fetchUsers()" class="px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-red-500 focus:ring-1 focus:ring-red-500">
+                    <option value="">Status: All</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="banned">Banned</option>
+                </select>
+                
+                <select x-model="role" @change="fetchUsers()" class="px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-red-500 focus:ring-1 focus:ring-red-500">
+                    <option value="">Role: All</option>
+                    <option value="seller">Seller</option>
+                    <option value="buyer">Buyer</option>
+                    <option value="admin">Admin</option>
+                </select>
             </div>
             
-            <select x-model="status" @change="fetchUsers()" class="px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-red-500 focus:ring-1 focus:ring-red-500">
-                <option value="">Status: All</option>
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="banned">Banned</option>
-            </select>
-            
-            <select x-model="role" @change="fetchUsers()" class="px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-red-500 focus:ring-1 focus:ring-red-500">
-                <option value="">Role: All</option>
-                <option value="seller">Seller</option>
-                <option value="buyer">Buyer</option>
-                <option value="admin">Admin</option>
-            </select>
+            <div x-show="selectedItems.length > 0" x-transition class="flex items-center space-x-2">
+                <span class="text-sm text-gray-400" x-text="selectedItems.length + ' selected'"></span>
+                <button @click="bulkAction('activate')" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm">
+                    Activate
+                </button>
+                <button @click="bulkAction('suspend')" class="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors text-sm">
+                    Suspend
+                </button>
+                <button @click="bulkAction('ban')" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm">
+                    Ban
+                </button>
+                <button @click="clearSelection()" class="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm">
+                    Clear
+                </button>
+            </div>
         </div>
     </div>
 
@@ -75,7 +93,10 @@
             <thead class="bg-gray-800/50 border-b border-gray-700">
                 <tr>
                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                        <input type="checkbox" class="rounded">
+                        <input type="checkbox" 
+                               :checked="allSelected"
+                               @change="toggleSelectAll()"
+                               class="rounded">
                     </th>
                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">User</th>
                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Contact Info</th>
@@ -89,7 +110,10 @@
                 <template x-for="user in users" :key="user.id">
                     <tr class="hover:bg-gray-800/50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <input type="checkbox" class="rounded">
+                            <input type="checkbox" 
+                                   :checked="selectedItems.includes(user.id)"
+                                   @change="toggleSelect(user.id)"
+                                   class="rounded">
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center space-x-3">
@@ -158,11 +182,19 @@
             </div>
             <div class="flex items-center space-x-2">
                 <button @click="prevPage()" :disabled="page === 1" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded transition-colors text-sm">Previous</button>
-                <button class="px-3 py-1 bg-red-500 text-white rounded text-sm">1</button>
-                <button class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors text-sm">2</button>
-                <button class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors text-sm">3</button>
-                <span class="text-gray-400">...</span>
-                <button class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors text-sm">48</button>
+                <template x-for="pageNum in getPageNumbers()" :key="pageNum">
+                    <template x-if="pageNum === '...'">
+                        <span class="text-gray-400 px-2" x-text="pageNum"></span>
+                    </template>
+                    <template x-if="pageNum !== '...'">
+                        <button 
+                            @click="goToPage(pageNum)"
+                            :class="page === pageNum ? 'bg-red-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-white'"
+                            class="px-3 py-1 rounded transition-colors text-sm"
+                            x-text="pageNum">
+                        </button>
+                    </template>
+                </template>
                 <button @click="nextPage()" :disabled="page >= pagination.total_pages" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded transition-colors text-sm">Next</button>
             </div>
         </div>
@@ -263,6 +295,10 @@ function userManagement() {
         status: '',
         role: '',
         showCreateModal: false,
+        selectedItems: [],
+        get allSelected() {
+            return this.users.length > 0 && this.selectedItems.length === this.users.length;
+        },
         createForm: {
             name: '',
             email: '',
@@ -329,6 +365,61 @@ function userManagement() {
             window.location.href = '/api/admin/users/export';
         },
         
+        toggleSelect(userId) {
+            const index = this.selectedItems.indexOf(userId);
+            if (index === -1) {
+                this.selectedItems.push(userId);
+            } else {
+                this.selectedItems.splice(index, 1);
+            }
+        },
+        
+        toggleSelectAll() {
+            if (this.allSelected) {
+                this.selectedItems = [];
+            } else {
+                this.selectedItems = this.users.map(user => user.id);
+            }
+        },
+        
+        clearSelection() {
+            this.selectedItems = [];
+        },
+        
+        async bulkAction(action) {
+            if (this.selectedItems.length === 0) return;
+            
+            const actionText = action.charAt(0).toUpperCase() + action.slice(1);
+            if (!confirm(`Are you sure you want to ${actionText} ${this.selectedItems.length} user(s)?`)) return;
+            
+            try {
+                const response = await fetch('/api/admin/users/bulk-action', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: action,
+                        user_ids: this.selectedItems
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.selectedItems = [];
+                    this.fetchUsers();
+                } else {
+                    alert(data.message || 'Failed to perform bulk action');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while performing the bulk action');
+            }
+        },
+        
         prevPage() {
             if (this.page > 1) {
                 this.page--;
@@ -341,6 +432,49 @@ function userManagement() {
                 this.page++;
                 this.fetchUsers();
             }
+        },
+        
+        goToPage(pageNum) {
+            if (pageNum !== this.page && pageNum >= 1 && pageNum <= this.pagination.total_pages) {
+                this.page = pageNum;
+                this.fetchUsers();
+            }
+        },
+        
+        getPageNumbers() {
+            const totalPages = this.pagination.total_pages || 1;
+            const currentPage = this.page;
+            const pages = [];
+            
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pages.push(i);
+                }
+            } else {
+                if (currentPage <= 4) {
+                    for (let i = 1; i <= 5; i++) {
+                        pages.push(i);
+                    }
+                    pages.push('...');
+                    pages.push(totalPages);
+                } else if (currentPage >= totalPages - 3) {
+                    pages.push(1);
+                    pages.push('...');
+                    for (let i = totalPages - 4; i <= totalPages; i++) {
+                        pages.push(i);
+                    }
+                } else {
+                    pages.push(1);
+                    pages.push('...');
+                    for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                        pages.push(i);
+                    }
+                    pages.push('...');
+                    pages.push(totalPages);
+                }
+            }
+            
+            return pages;
         },
         
         async createUser() {
