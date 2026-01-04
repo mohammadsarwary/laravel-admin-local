@@ -95,6 +95,123 @@
             </div>
         </div>
     </div>
+
+    <!-- View Ad Modal -->
+    <div x-show="showViewModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showViewModal = false">
+        <div class="bg-gray-900 rounded-lg border border-gray-700 max-w-3xl w-full mx-4 shadow-xl max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700 sticky top-0 bg-gray-900">
+                <h3 class="text-lg font-semibold text-white">Ad Details</h3>
+                <button @click="showViewModal = false" class="text-gray-400 hover:text-white transition-colors">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="px-6 py-4" x-show="!viewModalLoading">
+                <!-- Title and Status -->
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <h4 class="text-xl font-semibold text-white" x-text="viewAd.title"></h4>
+                        <p class="text-gray-400 mt-1" x-text="viewAd.category_name"></p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 text-xs font-medium rounded-full"
+                              :class="{
+                                  'bg-green-500/20 text-green-400': viewAd.status === 'active',
+                                  'bg-yellow-500/20 text-yellow-400': viewAd.status === 'pending',
+                                  'bg-blue-500/20 text-blue-400': viewAd.status === 'sold',
+                                  'bg-red-500/20 text-red-400': viewAd.status === 'rejected'
+                              }"
+                              x-text="viewAd.status"></span>
+                        <span x-show="viewAd.is_featured" class="px-3 py-1 text-xs font-medium rounded-full bg-purple-500/20 text-purple-400">Featured</span>
+                    </div>
+                </div>
+                
+                <!-- Price -->
+                <div class="mb-4">
+                    <p class="text-3xl font-bold text-white">$<span x-text="parseFloat(viewAd.price).toFixed(2)"></span></p>
+                </div>
+                
+                <!-- Description -->
+                <div class="mb-4">
+                    <p class="text-sm text-gray-300" x-text="viewAd.description"></p>
+                </div>
+                
+                <!-- Images Gallery -->
+                <div x-show="viewAd.images && viewAd.images.length > 0" class="mb-4">
+                    <p class="text-sm font-medium text-gray-400 mb-2">Images</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <template x-for="(image, index) in viewAd.images" :key="index">
+                            <div class="aspect-square bg-gray-800 rounded-lg overflow-hidden">
+                                <img :src="image.url" :alt="image.alt || 'Ad image'" class="w-full h-full object-cover">
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Views</p>
+                        <p class="text-white font-semibold" x-text="viewAd.views || '0'"></p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Favorites</p>
+                        <p class="text-white font-semibold" x-text="viewAd.favorites || '0'"></p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Condition</p>
+                        <p class="text-white font-semibold" x-text="viewAd.condition || 'N/A'"></p>
+                    </div>
+                </div>
+                
+                <!-- User Info -->
+                <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700 mb-4">
+                    <p class="text-sm font-medium text-gray-400 mb-2">Posted By</p>
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-bold">
+                            <span x-text="viewAd.user_name ? viewAd.user_name.charAt(0).toUpperCase() : 'U'"></span>
+                        </div>
+                        <div>
+                            <p class="text-white font-medium" x-text="viewAd.user_name"></p>
+                            <p class="text-sm text-gray-400" x-text="viewAd.user_email"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Location -->
+                <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700 mb-4">
+                    <p class="text-sm font-medium text-gray-400 mb-2">Location</p>
+                    <p class="text-white" x-text="viewAd.location || 'Not specified'"></p>
+                </div>
+                
+                <!-- Dates -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Created</p>
+                        <p class="text-white" x-text="formatDate(viewAd.created_at)"></p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Last Updated</p>
+                        <p class="text-white" x-text="formatDate(viewAd.updated_at)"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div class="px-6 py-8 flex items-center justify-center" x-show="viewModalLoading">
+                <div class="text-gray-400">Loading ad details...</div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-700 sticky bottom-0 bg-gray-900">
+                <button @click="showViewModal = false" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -106,6 +223,9 @@ function adManagement() {
         page: 1,
         search: '',
         status: '',
+        showViewModal: false,
+        viewAd: {},
+        viewModalLoading: false,
         
         async fetchAds() {
             try {
@@ -180,7 +300,28 @@ function adManagement() {
         },
         
         viewAd(ad) {
-            alert('View ad: ' + ad.title);
+            this.showViewModal = true;
+            this.viewModalLoading = true;
+            this.viewAd = ad;
+            
+            fetch(`/api/admin/ads/${ad.id}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.viewAd = data.data;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching ad details:', error);
+            })
+            .finally(() => {
+                this.viewModalLoading = false;
+            });
         },
         
         exportAds() {

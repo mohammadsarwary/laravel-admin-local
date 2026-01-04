@@ -281,6 +281,178 @@
             </div>
         </div>
     </div>
+
+    <!-- View User Modal -->
+    <div x-show="showViewModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showViewModal = false">
+        <div class="bg-gray-900 rounded-lg border border-gray-700 max-w-2xl w-full mx-4 shadow-xl max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700 sticky top-0 bg-gray-900">
+                <h3 class="text-lg font-semibold text-white">User Details</h3>
+                <button @click="showViewModal = false" class="text-gray-400 hover:text-white transition-colors">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="px-6 py-4" x-show="!viewModalLoading">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        <span x-text="viewUser.name.charAt(0).toUpperCase()"></span>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-xl font-semibold text-white" x-text="viewUser.name"></h4>
+                        <p class="text-gray-400" x-text="viewUser.email"></p>
+                        <div class="flex items-center space-x-2 mt-2">
+                            <span class="px-3 py-1 text-xs font-medium rounded-full"
+                                  :class="{
+                                      'bg-blue-500/20 text-blue-400': viewUser.role === 'seller',
+                                      'bg-purple-500/20 text-purple-400': viewUser.role === 'buyer',
+                                      'bg-red-500/20 text-red-400': viewUser.role === 'admin'
+                                  }"
+                                  x-text="viewUser.role ? viewUser.role.charAt(0).toUpperCase() + viewUser.role.slice(1) : 'Buyer'"></span>
+                            <span class="px-3 py-1 text-xs font-medium rounded-full"
+                                  :class="{
+                                      'bg-green-500/20 text-green-400': viewUser.is_active,
+                                      'bg-yellow-500/20 text-yellow-400': !viewUser.is_active && viewUser.is_verified,
+                                      'bg-red-500/20 text-red-400': !viewUser.is_active && !viewUser.is_verified
+                                  }"
+                                  x-text="viewUser.is_active ? 'Active' : (viewUser.is_verified ? 'Pending' : 'Banned')"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Phone</p>
+                        <p class="text-white" x-text="viewUser.phone || 'Not provided'"></p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Location</p>
+                        <p class="text-white" x-text="viewUser.location || 'Not provided'"></p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Rating</p>
+                        <p class="text-white" x-text="viewUser.rating || 'N/A'"></p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Active Listings</p>
+                        <p class="text-white" x-text="viewUser.active_listings || '0'"></p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Joined</p>
+                        <p class="text-white" x-text="formatDate(viewUser.created_at)"></p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-1">Last Login</p>
+                        <p class="text-white" x-text="viewUser.last_login ? formatDate(viewUser.last_login) : 'Never'"></p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                    <p class="text-sm text-gray-400 mb-2">Verification Status</p>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full"
+                              :class="viewUser.is_verified ? 'bg-green-500' : 'bg-red-500'"></span>
+                        <span class="text-white" x-text="viewUser.is_verified ? 'Verified' : 'Not Verified'"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div class="px-6 py-8 flex items-center justify-center" x-show="viewModalLoading">
+                <div class="text-gray-400">Loading user details...</div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-700 sticky bottom-0 bg-gray-900">
+                <button @click="showViewModal = false" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div x-show="showEditModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showEditModal = false">
+        <div class="bg-gray-900 rounded-lg border border-gray-700 max-w-md w-full mx-4 shadow-xl">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700">
+                <h3 class="text-lg font-semibold text-white">Edit User</h3>
+                <button @click="showEditModal = false" class="text-gray-400 hover:text-white transition-colors">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="px-6 py-4 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
+                    <input type="text" 
+                           x-model="editForm.name"
+                           placeholder="Enter full name"
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email *</label>
+                    <input type="email" 
+                           x-model="editForm.email"
+                           placeholder="Enter email address"
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+                    <input type="tel" 
+                           x-model="editForm.phone"
+                           placeholder="Enter phone number"
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                    <input type="text" 
+                           x-model="editForm.location"
+                           placeholder="Enter location"
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Role *</label>
+                    <select x-model="editForm.role" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-red-500 focus:ring-1 focus:ring-red-500">
+                        <option value="">Select a role</option>
+                        <option value="buyer">Buyer</option>
+                        <option value="seller">Seller</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Status *</label>
+                    <select x-model="editForm.is_active" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-red-500 focus:ring-1 focus:ring-red-500">
+                        <option value="">Select a status</option>
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                </div>
+                
+                <div x-show="editForm.error" class="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                    <span x-text="editForm.error"></span>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-700">
+                <button @click="showEditModal = false" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button @click="updateUser()" :disabled="editForm.loading" class="px-4 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2">
+                    <span x-show="!editForm.loading">Update User</span>
+                    <span x-show="editForm.loading">Updating...</span>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -296,10 +468,26 @@ function userManagement() {
         role: '',
         showCreateModal: false,
         selectedItems: [],
+        showViewModal: false,
+        showEditModal: false,
+        viewUser: {},
+        editUser: {},
+        viewModalLoading: false,
         get allSelected() {
             return this.users.length > 0 && this.selectedItems.length === this.users.length;
         },
         createForm: {
+            name: '',
+            email: '',
+            phone: '',
+            location: '',
+            role: '',
+            is_active: '',
+            loading: false,
+            error: ''
+        },
+        editForm: {
+            id: null,
             name: '',
             email: '',
             phone: '',
@@ -353,12 +541,107 @@ function userManagement() {
             }
         },
         
-        viewUser(user) {
-            alert('View user: ' + user.name);
+        async viewUser(user) {
+            this.showViewModal = true;
+            this.viewModalLoading = true;
+            this.viewUser = user;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${user.id}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.viewUser = data.data;
+                }
+            } catch (error) {
+                console.error('Error fetching user details:', error);
+            } finally {
+                this.viewModalLoading = false;
+            }
         },
         
         editUser(user) {
-            alert('Edit user: ' + user.name);
+            this.showEditModal = true;
+            this.editForm = {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone || '',
+                location: user.location || '',
+                role: user.role || 'buyer',
+                is_active: user.is_active ? '1' : '0',
+                loading: false,
+                error: ''
+            };
+        },
+        
+        async updateUser() {
+            this.editForm.error = '';
+            
+            if (!this.editForm.name.trim()) {
+                this.editForm.error = 'Full name is required';
+                return;
+            }
+            
+            if (!this.editForm.email.trim()) {
+                this.editForm.error = 'Email is required';
+                return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(this.editForm.email)) {
+                this.editForm.error = 'Please enter a valid email address';
+                return;
+            }
+            
+            if (!this.editForm.role) {
+                this.editForm.error = 'Role is required';
+                return;
+            }
+            
+            if (this.editForm.is_active === '') {
+                this.editForm.error = 'Status is required';
+                return;
+            }
+            
+            this.editForm.loading = true;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${this.editForm.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: this.editForm.name,
+                        email: this.editForm.email,
+                        phone: this.editForm.phone || null,
+                        location: this.editForm.location || null,
+                        role: this.editForm.role,
+                        is_active: parseInt(this.editForm.is_active)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.showEditModal = false;
+                    this.fetchUsers();
+                } else {
+                    this.editForm.error = data.message || 'Failed to update user';
+                }
+            } catch (error) {
+                console.error('Error updating user:', error);
+                this.editForm.error = 'An error occurred while updating the user';
+            } finally {
+                this.editForm.loading = false;
+            }
         },
         
         exportUsers() {

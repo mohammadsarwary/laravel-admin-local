@@ -163,6 +163,44 @@
             </div>
         </div>
     </div>
+
+    <!-- Reject Modal -->
+    <div x-show="showRejectModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showRejectModal = false">
+        <div class="bg-gray-900 rounded-lg border border-gray-700 max-w-md w-full mx-4 shadow-xl">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700">
+                <h3 class="text-lg font-semibold text-white">Reject Listing</h3>
+                <button @click="showRejectModal = false" class="text-gray-400 hover:text-white transition-colors">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="px-6 py-4">
+                <p class="text-sm text-gray-400 mb-4">Please provide a reason for rejecting this listing. This will be visible to the user.</p>
+                <textarea 
+                    x-model="rejectReason"
+                    placeholder="Enter rejection reason..."
+                    rows="4"
+                    class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors resize-none"></textarea>
+                
+                <div x-show="rejectError" class="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm mt-4">
+                    <span x-text="rejectError"></span>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-700">
+                <button @click="showRejectModal = false" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button @click="submitRejection()" :disabled="rejectLoading" class="px-4 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2">
+                    <span x-show="!rejectLoading">Reject Listing</span>
+                    <span x-show="rejectLoading">Rejecting...</span>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -174,6 +212,11 @@ function moderation() {
         reportedItems: [],
         stats: {},
         totalPending: 0,
+        showRejectModal: false,
+        rejectingItemId: null,
+        rejectReason: '',
+        rejectLoading: false,
+        rejectError: '',
         
         async fetchPendingItems() {
             try {
@@ -211,18 +254,48 @@ function moderation() {
         },
         
         async rejectListing(id) {
-            if (!confirm('Are you sure you want to reject this listing?')) return;
+            this.showRejectModal = true;
+            this.rejectingItemId = id;
+            this.rejectReason = '';
+            this.rejectError = '';
+        },
+        
+        async submitRejection() {
+            if (!this.rejectReason.trim()) {
+                this.rejectError = 'Please provide a rejection reason';
+                return;
+            }
+            
+            this.rejectLoading = true;
+            this.rejectError = '';
+            
             try {
-                await fetch(`/api/admin/listings/${id}/reject`, {
+                const response = await fetch(`/api/admin/listings/${this.rejectingItemId}/reject`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
-                        'Accept': 'application/json'
-                    }
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        reason: this.rejectReason
+                    })
                 });
-                this.fetchPendingItems();
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.showRejectModal = false;
+                    this.rejectReason = '';
+                    this.fetchPendingItems();
+                } else {
+                    this.rejectError = data.message || 'Failed to reject listing';
+                }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error rejecting listing:', error);
+                this.rejectError = 'An error occurred while rejecting the listing';
+            } finally {
+                this.rejectLoading = false;
             }
         },
         
