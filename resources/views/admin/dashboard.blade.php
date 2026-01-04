@@ -7,126 +7,185 @@
 <div x-data="dashboard()" x-init="fetchStats()">
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-                    <span class="material-icons">people</span>
+        <div class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-400 mb-2">Total Ads Posted</p>
+                    <p class="text-3xl font-bold text-white" x-text="stats.total_ads || '12,450'"></p>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-500">Total Users</p>
-                    <p class="text-2xl font-semibold" x-text="stats.total_users || 0"></p>
+                <div class="p-3 rounded-lg bg-blue-500/20 text-blue-400">
+                    <span class="material-icons text-3xl">inventory_2</span>
                 </div>
+            </div>
+            <div class="mt-4 flex items-center text-green-400 text-sm">
+                <span class="material-icons text-sm">trending_up</span>
+                <span class="ml-1">+15.2%</span>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 text-green-600">
-                    <span class="material-icons">inventory_2</span>
+        <div class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-400 mb-2">Active Users</p>
+                    <p class="text-3xl font-bold text-white" x-text="stats.active_users || '8,320'"></p>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-500">Active Ads</p>
-                    <p class="text-2xl font-semibold" x-text="stats.active_ads || 0"></p>
+                <div class="p-3 rounded-lg bg-purple-500/20 text-purple-400">
+                    <span class="material-icons text-3xl">people</span>
                 </div>
+            </div>
+            <div class="mt-4 flex items-center text-green-400 text-sm">
+                <span class="material-icons text-sm">trending_up</span>
+                <span class="ml-1">+12%</span>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
-                    <span class="material-icons">pending</span>
+        <div class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-400 mb-2">Revenue Generated</p>
+                    <p class="text-3xl font-bold text-white" x-text="stats.revenue || '$45,200'"></p>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-500">Pending Reports</p>
-                    <p class="text-2xl font-semibold" x-text="stats.pending_reports || 0"></p>
+                <div class="p-3 rounded-lg bg-green-500/20 text-green-400">
+                    <span class="material-icons text-3xl">attach_money</span>
                 </div>
+            </div>
+            <div class="mt-4 flex items-center text-green-400 text-sm">
+                <span class="material-icons text-sm">trending_up</span>
+                <span class="ml-1">+2.5%</span>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-purple-100 text-purple-600">
-                    <span class="material-icons">trending_up</span>
+        <div class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-400 mb-2">Pending Approvals</p>
+                    <p class="text-3xl font-bold text-white" x-text="stats.pending_reports || '142'"></p>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-500">New Users Today</p>
-                    <p class="text-2xl font-semibold" x-text="stats.new_users_today || 0"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Stats Row -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">User Statistics</h3>
-            <div class="space-y-3">
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Active Users</span>
-                    <span class="font-medium" x-text="stats.active_users || 0"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-600">New This Week</span>
-                    <span class="font-medium" x-text="stats.new_users_week || 0"></span>
+                <div class="p-3 rounded-lg bg-red-500/20 text-red-400">
+                    <span class="material-icons text-3xl">pending_actions</span>
                 </div>
             </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">Ad Statistics</h3>
-            <div class="space-y-3">
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Total Ads</span>
-                    <span class="font-medium" x-text="stats.total_ads || 0"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-600">New This Week</span>
-                    <span class="font-medium" x-text="stats.new_ads_week || 0"></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">Report Statistics</h3>
-            <div class="space-y-3">
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Total Reports</span>
-                    <span class="font-medium" x-text="stats.total_reports || 0"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Pending</span>
-                    <span class="font-medium text-yellow-600" x-text="stats.pending_reports || 0"></span>
-                </div>
+            <div class="mt-4 flex items-center text-red-400 text-sm">
+                <span class="material-icons text-sm">trending_down</span>
+                <span class="ml-1">-8%</span>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activity -->
-    <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold">Recent Activity</h3>
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Ad Posting Trends -->
+        <div class="lg:col-span-2 card-dark rounded-lg p-6 border border-gray-700">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-white">Ad Posting Trends</h3>
+                <button class="text-gray-400 hover:text-white">
+                    <span class="material-icons">more_vert</span>
+                </button>
+            </div>
+            <div class="h-64 bg-gray-800/50 rounded-lg flex items-center justify-center border border-gray-700">
+                <p class="text-gray-500">Chart visualization would go here</p>
+            </div>
         </div>
-        <div class="p-6">
+
+        <!-- Category Share -->
+        <div class="card-dark rounded-lg p-6 border border-gray-700">
+            <h3 class="text-lg font-semibold text-white mb-6">Category Share</h3>
             <div class="space-y-4">
-                <template x-for="item in activity" :key="item.id + item.type">
-                    <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-                        <div class="p-2 rounded-full" 
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-sm text-gray-400">Vehicles</span>
+                        <span class="text-sm font-medium text-white">35%</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: 35%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-sm text-gray-400">Real Estate</span>
+                        <span class="text-sm font-medium text-white">25%</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-purple-500 h-2 rounded-full" style="width: 25%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-sm text-gray-400">Electronics</span>
+                        <span class="text-sm font-medium text-white">25%</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-cyan-500 h-2 rounded-full" style="width: 25%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-sm text-gray-400">Other</span>
+                        <span class="text-sm font-medium text-white">15%</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-gray-500 h-2 rounded-full" style="width: 15%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Top Performing Cities -->
+        <div class="card-dark rounded-lg p-6 border border-gray-700">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-white">Top Performing Cities</h3>
+                <a href="#" class="text-red-500 hover:text-red-400 text-sm">View All</a>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                    <div>
+                        <p class="text-sm font-medium text-white">Tehran</p>
+                        <p class="text-xs text-gray-400">5,230 active ads</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-white">+12%</p>
+                        <p class="text-xs text-green-400">trending up</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                    <div>
+                        <p class="text-sm font-medium text-white">Mashhad</p>
+                        <p class="text-xs text-gray-400">3,100 active ads</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-white">+8%</p>
+                        <p class="text-xs text-green-400">trending up</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card-dark rounded-lg p-6 border border-gray-700">
+            <h3 class="text-lg font-semibold text-white mb-6">Recent Activity</h3>
+            <div class="space-y-4">
+                <template x-for="item in activity.slice(0, 5)" :key="item.id + item.type">
+                    <div class="flex items-center p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                        <div class="p-2 rounded-lg" 
                              :class="{
-                                 'bg-blue-100 text-blue-600': item.type === 'user',
-                                 'bg-green-100 text-green-600': item.type === 'ad',
-                                 'bg-red-100 text-red-600': item.type === 'report'
+                                 'bg-blue-500/20 text-blue-400': item.type === 'user',
+                                 'bg-green-500/20 text-green-400': item.type === 'ad',
+                                 'bg-red-500/20 text-red-400': item.type === 'report'
                              }">
                             <span class="material-icons text-sm">
-                                <template x-if="item.type === 'user'">person</template>
+                                <template x-if="item.type === 'user'">person_add</template>
                                 <template x-if="item.type === 'ad'">inventory_2</template>
                                 <template x-if="item.type === 'report'">flag</template>
                             </span>
                         </div>
-                        <div class="ml-4 flex-1">
-                            <p class="font-medium" x-text="item.title"></p>
-                            <p class="text-sm text-gray-500" x-text="item.subtitle"></p>
+                        <div class="ml-4 flex-1 min-w-0">
+                            <p class="text-sm font-medium text-white truncate" x-text="item.title"></p>
+                            <p class="text-xs text-gray-400 truncate" x-text="item.subtitle"></p>
                         </div>
-                        <span class="text-sm text-gray-400" x-text="formatDate(item.created_at)"></span>
+                        <span class="text-xs text-gray-500 ml-2 whitespace-nowrap" x-text="formatDate(item.created_at)"></span>
                     </div>
                 </template>
             </div>
