@@ -177,6 +177,50 @@
         </div>
     </div>
 
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        
+        const colors = {
+            success: 'bg-green-500/20 border-green-500/50 text-green-400',
+            error: 'bg-red-500/20 border-red-500/50 text-red-400',
+            warning: 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400',
+            info: 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+        };
+        
+        const icons = {
+            success: 'check_circle',
+            error: 'error',
+            warning: 'warning',
+            info: 'info'
+        };
+        
+        toast.className = `flex items-center p-4 rounded-lg border ${colors[type]} shadow-lg transform transition-all duration-300 translate-x-full`;
+        toast.innerHTML = `
+            <span class="material-icons mr-3">${icons[type]}</span>
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()" class="ml-4 hover:opacity-70">
+                <span class="material-icons text-sm">close</span>
+            </button>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full');
+        }, 10);
+        
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    </script>
+
     @stack('scripts')
 </body>
 </html>

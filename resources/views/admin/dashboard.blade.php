@@ -90,43 +90,23 @@
         <!-- Category Share -->
         <div class="card-dark rounded-lg p-6 border border-gray-700">
             <h3 class="text-lg font-semibold text-white mb-6">Category Share</h3>
-            <div class="space-y-4">
-                <div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm text-gray-400">Vehicles</span>
-                        <span class="text-sm font-medium text-white">35%</span>
+            <div x-show="loadingCategories" class="flex items-center justify-center py-4">
+                <div class="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <div x-show="!loadingCategories" class="space-y-4">
+                <template x-for="category in categories" :key="category.name">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm text-gray-400" x-text="category.name"></span>
+                            <span class="text-sm font-medium text-white" x-text="category.percentage + '%'"></span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="h-2 rounded-full transition-all duration-300"
+                                 :class="category.color"
+                                 :style="'width: ' + category.percentage + '%'"></div>
+                        </div>
                     </div>
-                    <div class="w-full bg-gray-700 rounded-full h-2">
-                        <div class="bg-blue-500 h-2 rounded-full" style="width: 35%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm text-gray-400">Real Estate</span>
-                        <span class="text-sm font-medium text-white">25%</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-2">
-                        <div class="bg-purple-500 h-2 rounded-full" style="width: 25%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm text-gray-400">Electronics</span>
-                        <span class="text-sm font-medium text-white">25%</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-2">
-                        <div class="bg-cyan-500 h-2 rounded-full" style="width: 25%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm text-gray-400">Other</span>
-                        <span class="text-sm font-medium text-white">15%</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-2">
-                        <div class="bg-gray-500 h-2 rounded-full" style="width: 15%"></div>
-                    </div>
-                </div>
+                </template>
             </div>
         </div>
     </div>
@@ -139,27 +119,22 @@
                 <h3 class="text-lg font-semibold text-white">Top Performing Cities</h3>
                 <a href="#" class="text-red-500 hover:text-red-400 text-sm">View All</a>
             </div>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700">
-                    <div>
-                        <p class="text-sm font-medium text-white">Tehran</p>
-                        <p class="text-xs text-gray-400">5,230 active ads</p>
+            <div x-show="loadingCities" class="flex items-center justify-center py-4">
+                <div class="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <div x-show="!loadingCities" class="space-y-4">
+                <template x-for="city in topCities" :key="city.name">
+                    <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                        <div>
+                            <p class="text-sm font-medium text-white" x-text="city.name"></p>
+                            <p class="text-xs text-gray-400" x-text="city.ads + ' active ads'"></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-white" x-text="'+' + city.growth + '%'"></p>
+                            <p class="text-xs" :class="city.growth >= 0 ? 'text-green-400' : 'text-red-400'" x-text="city.growth >= 0 ? 'trending up' : 'trending down'"></p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-sm font-medium text-white">+12%</p>
-                        <p class="text-xs text-green-400">trending up</p>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700">
-                    <div>
-                        <p class="text-sm font-medium text-white">Mashhad</p>
-                        <p class="text-xs text-gray-400">3,100 active ads</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm font-medium text-white">+8%</p>
-                        <p class="text-xs text-green-400">trending up</p>
-                    </div>
-                </div>
+                </template>
             </div>
         </div>
 
@@ -200,6 +175,10 @@ function dashboard() {
         stats: {},
         activity: [],
         adTrendsChart: null,
+        categories: [],
+        loadingCategories: false,
+        topCities: [],
+        loadingCities: false,
         
         async fetchStats() {
             try {
@@ -226,6 +205,8 @@ function dashboard() {
                 }
                 
                 await this.initCharts();
+                await this.fetchCategories();
+                await this.fetchCities();
             } catch (error) {
                 console.error('Error fetching stats:', error);
             }
@@ -307,6 +288,79 @@ function dashboard() {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
                 values: [1200, 1900, 1500, 2100, 1800, 2400, 2200]
             });
+        },
+        
+        async fetchCategories() {
+            this.loadingCategories = true;
+            try {
+                const response = await fetch('/api/admin/analytics/categories', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    this.categories = data.data.map((cat, index) => ({
+                        name: cat.name,
+                        percentage: cat.percentage,
+                        color: this.getCategoryColor(index)
+                    }));
+                } else {
+                    this.categories = this.getMockCategories();
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                this.categories = this.getMockCategories();
+            } finally {
+                this.loadingCategories = false;
+            }
+        },
+        
+        getMockCategories() {
+            return [
+                { name: 'Vehicles', percentage: 35, color: 'bg-blue-500' },
+                { name: 'Real Estate', percentage: 25, color: 'bg-purple-500' },
+                { name: 'Electronics', percentage: 25, color: 'bg-cyan-500' },
+                { name: 'Other', percentage: 15, color: 'bg-gray-500' }
+            ];
+        },
+        
+        getCategoryColor(index) {
+            const colors = ['bg-blue-500', 'bg-purple-500', 'bg-cyan-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500'];
+            return colors[index % colors.length];
+        },
+        
+        async fetchCities() {
+            this.loadingCities = true;
+            try {
+                const response = await fetch('/api/admin/analytics/locations', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    this.topCities = data.data;
+                } else {
+                    this.topCities = this.getMockCities();
+                }
+            } catch (error) {
+                console.error('Error fetching cities:', error);
+                this.topCities = this.getMockCities();
+            } finally {
+                this.loadingCities = false;
+            }
+        },
+        
+        getMockCities() {
+            return [
+                { name: 'Tehran', ads: 5230, growth: 12 },
+                { name: 'Mashhad', ads: 3100, growth: 8 }
+            ];
         },
         
         formatDate(dateString) {

@@ -7,7 +7,38 @@
 <div x-data="reportManagement()" x-init="fetchReports()">
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow mb-6 p-4">
+        <!-- Error Alert -->
+        <div x-show="error" x-transition class="mb-4 bg-red-500/20 border border-red-500/50 rounded-lg p-4 flex items-center justify-between">
+            <div class="flex items-center">
+                <span class="material-icons text-red-400 mr-3">error</span>
+                <p class="text-red-400" x-text="error"></p>
+            </div>
+            <button @click="error = ''" class="text-red-400 hover:text-white">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        
         <div class="flex flex-wrap gap-4 items-center">
+            <div class="flex-1 min-w-64">
+                <input type="text"
+                       x-model="search"
+                       @input.debounce.300ms="fetchReports()"
+                       placeholder="Search reports..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <input type="date"
+                       x-model="dateFrom"
+                       @change="fetchReports()"
+                       class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                <span class="text-gray-500">to</span>
+                <input type="date"
+                       x-model="dateTo"
+                       @change="fetchReports()"
+                       class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+            
             <select x-model="status" @change="fetchReports()" class="px-4 py-2 border border-gray-300 rounded-lg">
                 <option value="">All Status</option>
                 <option value="pending">Pending</option>
@@ -26,6 +57,14 @@
 
     <!-- Reports Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- Loading Overlay -->
+        <div x-show="loading" class="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-10">
+            <div class="flex flex-col items-center">
+                <div class="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-gray-400 mt-4">Loading reports...</p>
+            </div>
+        </div>
+        
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
@@ -38,6 +77,20 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
+                <!-- Empty State -->
+                <tr x-show="!loading && reports.length === 0">
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center">
+                            <span class="material-icons text-gray-400 text-5xl mb-4">flag</span>
+                            <p class="text-gray-500 text-lg mb-2">No reports found</p>
+                            <p class="text-gray-400 text-sm mb-4">Try adjusting your filters</p>
+                            <button @click="status = ''; type = ''; fetchReports()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                                Clear Filters
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                
                 <template x-for="report in reports" :key="report.id">
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4">
@@ -192,16 +245,25 @@ function reportManagement() {
         reports: [],
         pagination: {},
         page: 1,
+        search: '',
+        dateFrom: '',
+        dateTo: '',
         status: '',
         type: '',
         showViewModal: false,
         viewReport: {},
+        loading: false,
+        error: '',
         
         async fetchReports() {
+            this.loading = true;
             try {
                 const params = new URLSearchParams({
                     page: this.page,
                     limit: 20,
+                    search: this.search,
+                    date_from: this.dateFrom,
+                    date_to: this.dateTo,
                     status: this.status,
                     type: this.type
                 });
@@ -219,6 +281,8 @@ function reportManagement() {
                 }
             } catch (error) {
                 console.error('Error fetching reports:', error);
+            } finally {
+                this.loading = false;
             }
         },
         

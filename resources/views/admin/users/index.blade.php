@@ -24,6 +24,17 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <!-- Error Alert -->
+        <div x-show="error" x-transition class="col-span-full bg-red-500/20 border border-red-500/50 rounded-lg p-4 flex items-center justify-between">
+            <div class="flex items-center">
+                <span class="material-icons text-red-400 mr-3">error</span>
+                <p class="text-red-400" x-text="error"></p>
+            </div>
+            <button @click="error = ''" class="text-red-400 hover:text-white">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        
         <div class="card-dark rounded-lg p-4 border border-gray-700">
             <p class="text-3xl font-bold text-white" x-text="userStats.total || '24,593'"></p>
             <p class="text-sm text-gray-400 mt-1">Total Users</p>
@@ -47,14 +58,26 @@
         <div class="flex flex-wrap gap-4 items-center justify-between">
             <div class="flex flex-wrap gap-4 items-center">
                 <div class="flex-1 min-w-64">
-                    <input type="text" 
-                           x-model="search" 
+                    <input type="text"
+                           x-model="search"
                            @input.debounce.300ms="fetchUsers()"
-                           placeholder="Search by name, email, or phone..."
-                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+                           placeholder="Search users..."
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-red-500 text-white placeholder-gray-500">
                 </div>
                 
-                <select x-model="status" @change="fetchUsers()" class="px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-red-500 focus:ring-1 focus:ring-red-500">
+                <div class="flex items-center gap-2">
+                    <input type="date"
+                           x-model="dateFrom"
+                           @change="fetchUsers()"
+                           class="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-red-500 text-white">
+                    <span class="text-gray-500">to</span>
+                    <input type="date"
+                           x-model="dateTo"
+                           @change="fetchUsers()"
+                           class="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-red-500 text-white">
+                </div>
+                
+                <select x-model="status" @change="fetchUsers()" class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-red-500 text-white">
                     <option value="">Status: All</option>
                     <option value="active">Active</option>
                     <option value="pending">Pending</option>
@@ -89,6 +112,14 @@
 
     <!-- Users Table -->
     <div class="card-dark rounded-lg border border-gray-700 overflow-hidden">
+        <!-- Loading Overlay -->
+        <div x-show="loading" class="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-10">
+            <div class="flex flex-col items-center">
+                <div class="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-gray-400 mt-4">Loading users...</p>
+            </div>
+        </div>
+        
         <table class="min-w-full divide-y divide-gray-700">
             <thead class="bg-gray-800/50 border-b border-gray-700">
                 <tr>
@@ -107,6 +138,20 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-700">
+                <!-- Empty State -->
+                <tr x-show="!loading && users.length === 0">
+                    <td colspan="7" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center">
+                            <span class="material-icons text-gray-600 text-5xl mb-4">people_outline</span>
+                            <p class="text-gray-400 text-lg mb-2">No users found</p>
+                            <p class="text-gray-500 text-sm mb-4">Try adjusting your search or filters</p>
+                            <button @click="search = ''; status = ''; role = ''; fetchUsers()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+                                Clear Filters
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                
                 <template x-for="user in users" :key="user.id">
                     <tr class="hover:bg-gray-800/50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -464,6 +509,8 @@ function userManagement() {
         pagination: {},
         page: 1,
         search: '',
+        dateFrom: '',
+        dateTo: '',
         status: '',
         role: '',
         showCreateModal: false,
@@ -473,6 +520,8 @@ function userManagement() {
         viewUser: {},
         editUser: {},
         viewModalLoading: false,
+        loading: false,
+        error: '',
         get allSelected() {
             return this.users.length > 0 && this.selectedItems.length === this.users.length;
         },
@@ -499,11 +548,14 @@ function userManagement() {
         },
         
         async fetchUsers() {
+            this.loading = true;
             try {
                 const params = new URLSearchParams({
                     page: this.page,
                     limit: 20,
                     search: this.search,
+                    date_from: this.dateFrom,
+                    date_to: this.dateTo,
                     status: this.status,
                     role: this.role
                 });
@@ -522,22 +574,31 @@ function userManagement() {
                 }
             } catch (error) {
                 console.error('Error fetching users:', error);
+            } finally {
+                this.loading = false;
             }
         },
         
         async deleteUser(id) {
             if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
             try {
-                await fetch(`/api/admin/users/${id}`, {
+                const response = await fetch(`/api/admin/users/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
                         'Accept': 'application/json'
                     }
                 });
-                this.fetchUsers();
+                const data = await response.json();
+                if (data.success) {
+                    showToast('User deleted successfully');
+                    this.fetchUsers();
+                } else {
+                    this.error = data.message || 'Failed to delete user';
+                }
             } catch (error) {
                 console.error('Error:', error);
+                this.error = 'An error occurred while deleting the user';
             }
         },
         
@@ -632,6 +693,7 @@ function userManagement() {
                 
                 if (data.success) {
                     this.showEditModal = false;
+                    showToast('User updated successfully');
                     this.fetchUsers();
                 } else {
                     this.editForm.error = data.message || 'Failed to update user';
@@ -693,6 +755,7 @@ function userManagement() {
                 
                 if (data.success) {
                     this.selectedItems = [];
+                    showToast(`${count} users updated successfully`);
                     this.fetchUsers();
                 } else {
                     alert(data.message || 'Failed to perform bulk action');
@@ -823,6 +886,7 @@ function userManagement() {
                         loading: false,
                         error: ''
                     };
+                    showToast('User created successfully');
                     this.fetchUsers();
                 } else {
                     this.createForm.error = data.message || 'Failed to create user';

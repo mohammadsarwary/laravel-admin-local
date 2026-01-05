@@ -7,13 +7,36 @@
 <div x-data="adManagement()" x-init="fetchAds()">
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow mb-6 p-4">
+        <!-- Error Alert -->
+        <div x-show="error" x-transition class="mb-4 bg-red-500/20 border border-red-500/50 rounded-lg p-4 flex items-center justify-between">
+            <div class="flex items-center">
+                <span class="material-icons text-red-400 mr-3">error</span>
+                <p class="text-red-400" x-text="error"></p>
+            </div>
+            <button @click="error = ''" class="text-red-400 hover:text-white">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        
         <div class="flex flex-wrap gap-4 items-center">
             <div class="flex-1 min-w-64">
-                <input type="text" 
-                       x-model="search" 
+                <input type="text"
+                       x-model="search"
                        @input.debounce.300ms="fetchAds()"
                        placeholder="Search ads..."
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <input type="date"
+                       x-model="dateFrom"
+                       @change="fetchAds()"
+                       class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                <span class="text-gray-500">to</span>
+                <input type="date"
+                       x-model="dateTo"
+                       @change="fetchAds()"
+                       class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
             </div>
             
             <select x-model="status" @change="fetchAds()" class="px-4 py-2 border border-gray-300 rounded-lg">
@@ -33,6 +56,14 @@
 
     <!-- Ads Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- Loading Overlay -->
+        <div x-show="loading" class="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-10">
+            <div class="flex flex-col items-center">
+                <div class="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-gray-400 mt-4">Loading ads...</p>
+            </div>
+        </div>
+        
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
@@ -46,6 +77,20 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
+                <!-- Empty State -->
+                <tr x-show="!loading && ads.length === 0">
+                    <td colspan="7" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center">
+                            <span class="material-icons text-gray-400 text-5xl mb-4">inventory_2</span>
+                            <p class="text-gray-500 text-lg mb-2">No ads found</p>
+                            <p class="text-gray-400 text-sm mb-4">Try adjusting your search or filters</p>
+                            <button @click="search = ''; status = ''; fetchAds()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                                Clear Filters
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                
                 <template x-for="ad in ads" :key="ad.id">
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4">
@@ -222,17 +267,24 @@ function adManagement() {
         pagination: {},
         page: 1,
         search: '',
+        dateFrom: '',
+        dateTo: '',
         status: '',
         showViewModal: false,
         viewAd: {},
         viewModalLoading: false,
+        loading: false,
+        error: '',
         
         async fetchAds() {
+            this.loading = true;
             try {
                 const params = new URLSearchParams({
                     page: this.page,
                     limit: 20,
                     search: this.search,
+                    date_from: this.dateFrom,
+                    date_to: this.dateTo,
                     status: this.status
                 });
                 
@@ -249,6 +301,8 @@ function adManagement() {
                 }
             } catch (error) {
                 console.error('Error fetching ads:', error);
+            } finally {
+                this.loading = false;
             }
         },
         
