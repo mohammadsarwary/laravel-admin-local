@@ -792,7 +792,6 @@ function userManagement() {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(userData)
-                    })
                 });
                 
                 const data = await response.json();

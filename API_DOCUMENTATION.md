@@ -3,6 +3,7 @@
 Complete list of all API endpoints in the Market Local application.
 
 ---
+BaseUrl: https://market.bazarino.store/
 
 ## 📋 Public API Routes (No Authentication Required)
 
