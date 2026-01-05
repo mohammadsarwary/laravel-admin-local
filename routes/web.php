@@ -15,10 +15,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Admin Login Route
+// Admin Login Routes
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
+
+Route::get('/admin/login', function () {
+    return view('auth.login');
+})->name('admin.login');
 
 Route::post('/login', function () {
     return response()->json(['message' => 'Use /api/admin/login instead'], 400);
