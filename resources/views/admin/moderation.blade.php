@@ -220,9 +220,9 @@ function moderation() {
         
         async fetchPendingItems() {
             try {
-                const response = await fetch('/api/admin/moderation', {
+                const response = await fetch('/api/admin/listings/pending', {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
@@ -243,7 +243,7 @@ function moderation() {
                 await fetch(`/api/admin/listings/${id}/approve`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
@@ -273,7 +273,7 @@ function moderation() {
                 const response = await fetch(`/api/admin/listings/${this.rejectingItemId}/reject`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
@@ -305,7 +305,7 @@ function moderation() {
                 await fetch(`/api/admin/listings/${id}`, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
@@ -320,7 +320,7 @@ function moderation() {
                 await fetch(`/api/admin/reports/${id}/dismiss`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });

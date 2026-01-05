@@ -258,24 +258,28 @@ function dashboard() {
             try {
                 const response = await fetch('/api/admin/stats', {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
                 const data = await response.json();
-                if (data.success) {
+                if (response.ok && data.success) {
                     this.stats = data.data;
+                } else {
+                    throw new Error(data.message || 'Failed to fetch stats');
                 }
                 
                 const activityResponse = await fetch('/api/admin/activity?limit=10', {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
                 const activityData = await activityResponse.json();
-                if (activityData.success) {
+                if (activityResponse.ok && activityData.success) {
                     this.activity = activityData.data;
+                } else {
+                    throw new Error(activityData.message || 'Failed to fetch activity');
                 }
                 
                 await this.initCharts();
@@ -290,14 +294,16 @@ function dashboard() {
             try {
                 const trendsResponse = await fetch('/api/admin/analytics/trends', {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
                 const trendsData = await trendsResponse.json();
                 
-                if (trendsData.success && trendsData.data) {
+                if (trendsResponse.ok && trendsData.success && trendsData.data) {
                     this.initAdTrendsChart(trendsData.data);
+                } else {
+                    throw new Error(trendsData.message || 'Failed to fetch chart data');
                 }
             } catch (error) {
                 console.error('Error fetching chart data:', error);
@@ -369,20 +375,20 @@ function dashboard() {
             try {
                 const response = await fetch('/api/admin/analytics/categories', {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
                 const data = await response.json();
                 
-                if (data.success && data.data) {
+                if (response.ok && data.success && data.data) {
                     this.categories = data.data.map((cat, index) => ({
                         name: cat.name,
                         percentage: cat.percentage,
                         color: this.getCategoryColor(index)
                     }));
                 } else {
-                    this.categories = this.getMockCategories();
+                    throw new Error(data.message || 'Failed to fetch categories');
                 }
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -411,16 +417,16 @@ function dashboard() {
             try {
                 const response = await fetch('/api/admin/analytics/locations', {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
                 const data = await response.json();
                 
-                if (data.success && data.data) {
+                if (response.ok && data.success && data.data) {
                     this.topCities = data.data;
                 } else {
-                    this.topCities = this.getMockCities();
+                    throw new Error(data.message || 'Failed to fetch cities');
                 }
             } catch (error) {
                 console.error('Error fetching cities:', error);
@@ -435,16 +441,6 @@ function dashboard() {
                 { name: 'Tehran', ads: 5230, growth: 12 },
                 { name: 'Mashhad', ads: 3100, growth: 8 }
             ];
-        },
-        
-        formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
         }
     }
 }

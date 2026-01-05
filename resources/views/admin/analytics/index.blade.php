@@ -103,7 +103,7 @@ function analytics() {
         
         async fetchAnalytics() {
             const headers = {
-                'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                'Authorization': 'Bearer ' + getAuthToken(),
                 'Accept': 'application/json'
             };
             

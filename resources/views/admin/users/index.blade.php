@@ -220,7 +220,7 @@
                                 </div>
                                 <div>
                                     <p class="text-sm font-medium text-white" x-text="user.name"></p>
-                                    <p class="text-xs text-gray-400" x-text="'@' + user.username"></p>
+                                    <p class="text-xs text-gray-400" x-text="'@' + user.email.split('@')[0]"></p>
                                 </div>
                             </div>
                         </td>
@@ -293,7 +293,7 @@
                         </button>
                     </template>
                 </template>
-                <button @click="nextPage()" :disabled="page >= pagination.total_pages" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded transition-colors text-sm">Next</button>
+                <button @click="nextPage()" :disabled="page >= (pagination.total_pages || 1)" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded transition-colors text-sm">Next</button>
             </div>
         </div>
     </div>
@@ -629,15 +629,17 @@ function userManagement() {
                 
                 const response = await fetch(`/api/admin/users?${params}`, {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
                 const data = await response.json();
-                if (data.success) {
+                if (response.ok && data.success) {
                     this.users = data.data.users || [];
                     this.pagination = data.data.pagination || {};
                     this.userStats = data.data.stats || {};
+                } else {
+                    throw new Error(data.message || 'Failed to fetch users');
                 }
             } catch (error) {
                 console.error('Error fetching users:', error);
@@ -662,16 +664,16 @@ function userManagement() {
                 const response = await fetch(`/api/admin/users/${id}`, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
                 const data = await response.json();
-                if (data.success) {
+                if (response.ok && data.success) {
                     showToast('User deleted successfully', 'success');
                     this.fetchUsers();
                 } else {
-                    this.error = data.message || 'Failed to delete user';
+                    throw new Error(data.message || 'Failed to delete user');
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -689,11 +691,11 @@ function userManagement() {
                     }
                 });
                 const data = await response.json();
-                if (data.success) {
+                if (response.ok && data.success) {
                     showToast('User restored successfully', 'success');
                     this.fetchUsers();
                 } else {
-                    showToast('Failed to restore user', 'error');
+                    throw new Error(data.message || 'Failed to restore user');
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -709,13 +711,15 @@ function userManagement() {
             try {
                 const response = await fetch(`/api/admin/users/${user.id}`, {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
                 const data = await response.json();
-                if (data.success) {
+                if (response.ok && data.success) {
                     this.viewUser = data.data;
+                } else {
+                    throw new Error(data.message || 'Failed to fetch user details');
                 }
             } catch (error) {
                 console.error('Error fetching user details:', error);
@@ -771,31 +775,34 @@ function userManagement() {
             this.editForm.loading = true;
             
             try {
+                const userData = {
+                    name: this.editForm.name,
+                    email: this.editForm.email,
+                    phone: this.editForm.phone || null,
+                    location: this.editForm.location || null,
+                    role: this.editForm.role,
+                    is_active: parseInt(this.editForm.is_active)
+                };
+                
                 const response = await fetch(`/api/admin/users/${this.editForm.id}`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        name: this.editForm.name,
-                        email: this.editForm.email,
-                        phone: this.editForm.phone || null,
-                        location: this.editForm.location || null,
-                        role: this.editForm.role,
-                        is_active: parseInt(this.editForm.is_active)
+                    body: JSON.stringify(userData)
                     })
                 });
                 
                 const data = await response.json();
                 
-                if (data.success) {
+                if (response.ok && data.success) {
                     this.showEditModal = false;
                     showToast('User updated successfully');
                     this.fetchUsers();
                 } else {
-                    this.editForm.error = data.message || 'Failed to update user';
+                    throw new Error(data.message || 'Failed to update user');
                 }
             } catch (error) {
                 console.error('Error updating user:', error);
@@ -840,7 +847,7 @@ function userManagement() {
                 const response = await fetch('/api/admin/users/bulk-action', {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
@@ -852,12 +859,12 @@ function userManagement() {
                 
                 const data = await response.json();
                 
-                if (data.success) {
+                if (response.ok && data.success) {
                     this.selectedItems = [];
                     showToast(`${count} users updated successfully`);
                     this.fetchUsers();
                 } else {
-                    alert(data.message || 'Failed to perform bulk action');
+                    throw new Error(data.message || 'Failed to perform bulk action');
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -873,14 +880,14 @@ function userManagement() {
         },
         
         nextPage() {
-            if (this.page < this.pagination.total_pages) {
+            if (this.page < (this.pagination.total_pages || 1)) {
                 this.page++;
                 this.fetchUsers();
             }
         },
         
         goToPage(pageNum) {
-            if (pageNum !== this.page && pageNum >= 1 && pageNum <= this.pagination.total_pages) {
+            if (pageNum !== this.page && pageNum >= 1 && pageNum <= (this.pagination.total_pages || 1)) {
                 this.page = pageNum;
                 this.fetchUsers();
             }
@@ -954,26 +961,28 @@ function userManagement() {
             this.createForm.loading = true;
             
             try {
+                const userData = {
+                    name: this.createForm.name,
+                    email: this.createForm.email,
+                    phone: this.createForm.phone || null,
+                    location: this.createForm.location || null,
+                    role: this.createForm.role,
+                    is_active: parseInt(this.createForm.is_active)
+                };
+                
                 const response = await fetch('/api/admin/users/create', {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        name: this.createForm.name,
-                        email: this.createForm.email,
-                        phone: this.createForm.phone || null,
-                        location: this.createForm.location || null,
-                        role: this.createForm.role,
-                        is_active: parseInt(this.createForm.is_active)
-                    })
+                    body: JSON.stringify(userData)
                 });
                 
                 const data = await response.json();
                 
-                if (data.success) {
+                if (response.ok && data.success) {
                     this.showCreateModal = false;
                     this.createForm = {
                         name: '',
@@ -988,7 +997,7 @@ function userManagement() {
                     showToast('User created successfully');
                     this.fetchUsers();
                 } else {
-                    this.createForm.error = data.message || 'Failed to create user';
+                    throw new Error(data.message || 'Failed to create user');
                 }
             } catch (error) {
                 console.error('Error creating user:', error);

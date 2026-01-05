@@ -313,7 +313,7 @@ function reportManagement() {
                 
                 const response = await fetch(`/api/admin/reports?${params}`, {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
@@ -349,15 +349,15 @@ function reportManagement() {
         
         async reportAction(id, action) {
             try {
-                await fetch(`/api/admin/reports/${id}/${action}`, {
+                const response = await fetch(`/api/admin/reports/${id}/action`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({ action: action })
                 });
-                this.fetchReports();
             } catch (error) {
                 console.error('Error:', error);
             }

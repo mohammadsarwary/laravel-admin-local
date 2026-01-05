@@ -360,7 +360,7 @@ function adManagement() {
                 
                 const response = await fetch(`/api/admin/ads?${params}`, {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json'
                     }
                 });
@@ -418,14 +418,14 @@ function adManagement() {
         
         async adAction(id, action, method = 'PUT', body = {}) {
             try {
-                await fetch(`/api/admin/ads/${id}/${action}`, {
-                    method,
+                const response = await fetch(`/api/admin/ads/${id}/action`, {
+                    method: 'PUT',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': 'Bearer ' + getAuthToken(),
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(body)
+                    body: JSON.stringify({ action: action, ...body })
                 });
                 this.fetchAds();
             } catch (error) {
@@ -440,7 +440,7 @@ function adManagement() {
             
             fetch(`/api/admin/ads/${ad.id}`, {
                 headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                    'Authorization': 'Bearer ' + getAuthToken(),
                     'Accept': 'application/json'
                 }
             })

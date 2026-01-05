@@ -255,6 +255,41 @@
     </div>
 
     <script>
+    // Global date formatting function for consistent date display across all admin pages
+    function formatDate(dateString, includeTime = false) {
+        if (!dateString) return 'N/A';
+        
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Invalid Date';
+        
+        if (includeTime) {
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } else {
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+    }
+    
+    // Token validation function
+    function getAuthToken() {
+        const token = localStorage.getItem('admin_token');
+        if (!token) {
+            // Redirect to login if no token found
+            window.location.href = '/admin/login';
+            return null;
+        }
+        return token;
+    }
+    
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
