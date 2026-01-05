@@ -15,6 +15,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// API Tester Route (Development Tool)
+Route::get('/api-tester', function () {
+    return view('api-tester');
+})->name('api-tester');
+
 // Admin Login Routes
 Route::get('/login', function () {
     return view('auth.login');
