@@ -343,64 +343,66 @@
             </div>
             
             <!-- Modal Body -->
-            <div class="px-6 py-4" x-show="!viewModalLoading && selectedCategory">
-                <!-- Name and Icon -->
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <span x-show="selectedCategory.icon" class="material-icons text-red-400 text-3xl" x-text="selectedCategory.icon"></span>
-                        <div>
-                            <h4 class="text-xl font-semibold text-white" x-text="selectedCategory.name"></h4>
-                            <p class="text-gray-400 text-sm" x-text="selectedCategory.slug"></p>
+            <template x-if="!viewModalLoading && selectedCategory">
+                <div class="px-6 py-4">
+                    <!-- Name and Icon -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <span x-show="selectedCategory.icon" class="material-icons text-red-400 text-3xl" x-text="selectedCategory.icon"></span>
+                            <div>
+                                <h4 class="text-xl font-semibold text-white" x-text="selectedCategory.name"></h4>
+                                <p class="text-gray-400 text-sm" x-text="selectedCategory.slug"></p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 text-xs font-medium rounded-full"
+                              :class="selectedCategory.is_active ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'"
+                              x-text="selectedCategory.is_active ? 'Active' : 'Inactive'"></span>
+                    </div>
+                    
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                            <p class="text-sm text-gray-400 mb-1">Total Ads</p>
+                            <p class="text-white font-semibold text-2xl" x-text="selectedCategory.ads_count || '0'"></p>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                            <p class="text-sm text-gray-400 mb-1">Display Order</p>
+                            <p class="text-white font-semibold text-2xl" x-text="selectedCategory.display_order"></p>
                         </div>
                     </div>
-                    <span class="px-3 py-1 text-xs font-medium rounded-full"
-                          :class="selectedCategory.is_active ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'"
-                          x-text="selectedCategory.is_active ? 'Active' : 'Inactive'"></span>
-                </div>
-                
-                <!-- Stats Grid -->
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                        <p class="text-sm text-gray-400 mb-1">Total Ads</p>
-                        <p class="text-white font-semibold text-2xl" x-text="selectedCategory.ads_count || '0'"></p>
+                    
+                    <!-- Parent Category -->
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700 mb-4" x-show="selectedCategory.parent_name">
+                        <p class="text-sm font-medium text-gray-400 mb-2">Parent Category</p>
+                        <p class="text-white" x-text="selectedCategory.parent_name"></p>
                     </div>
-                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                        <p class="text-sm text-gray-400 mb-1">Display Order</p>
-                        <p class="text-white font-semibold text-2xl" x-text="selectedCategory.display_order"></p>
+                    
+                    <!-- Subcategories -->
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700 mb-4" x-show="selectedCategory.children && selectedCategory.children.length > 0">
+                        <p class="text-sm font-medium text-gray-400 mb-2">Subcategories</p>
+                        <div class="space-y-2">
+                            <template x-for="child in selectedCategory.children" :key="child.id">
+                                <div class="flex items-center space-x-2 text-white">
+                                    <span class="material-icons text-sm text-gray-400">subdirectory_arrow_right</span>
+                                    <span x-text="child.name"></span>
+                                </div>
+                            </template>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Parent Category -->
-                <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700 mb-4" x-show="selectedCategory.parent_name">
-                    <p class="text-sm font-medium text-gray-400 mb-2">Parent Category</p>
-                    <p class="text-white" x-text="selectedCategory.parent_name"></p>
-                </div>
-                
-                <!-- Subcategories -->
-                <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700 mb-4" x-show="selectedCategory.children && selectedCategory.children.length > 0">
-                    <p class="text-sm font-medium text-gray-400 mb-2">Subcategories</p>
-                    <div class="space-y-2">
-                        <template x-for="child in selectedCategory.children" :key="child.id">
-                            <div class="flex items-center space-x-2 text-white">
-                                <span class="material-icons text-sm text-gray-400">subdirectory_arrow_right</span>
-                                <span x-text="child.name"></span>
-                            </div>
-                        </template>
+                    
+                    <!-- Dates -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                            <p class="text-sm text-gray-400 mb-1">Created</p>
+                            <p class="text-white" x-text="formatDate(selectedCategory.created_at)"></p>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                            <p class="text-sm text-gray-400 mb-1">Last Updated</p>
+                            <p class="text-white" x-text="formatDate(selectedCategory.updated_at)"></p>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Dates -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                        <p class="text-sm text-gray-400 mb-1">Created</p>
-                        <p class="text-white" x-text="formatDate(selectedCategory.created_at)"></p>
-                    </div>
-                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                        <p class="text-sm text-gray-400 mb-1">Last Updated</p>
-                        <p class="text-white" x-text="formatDate(selectedCategory.updated_at)"></p>
-                    </div>
-                </div>
-            </div>
+            </template>
             
             <!-- Loading State -->
             <div class="px-6 py-8 flex items-center justify-center" x-show="viewModalLoading">
@@ -424,10 +426,14 @@
             </div>
             <div class="px-6 py-4">
                 <p class="text-gray-300">Are you sure you want to delete this category? This action cannot be undone.</p>
-                <p class="text-sm text-gray-500 mt-2" x-show="deletingCategory" x-text="'Deleting: ' + deletingCategory.name"></p>
-                <p class="text-sm text-yellow-400 mt-2" x-show="deletingCategory && deletingCategory.ads_count > 0">
-                    ⚠️ This category has <span x-text="deletingCategory.ads_count"></span> ads. Please reassign them first.
-                </p>
+                <template x-if="deletingCategory">
+                    <div>
+                        <p class="text-sm text-gray-500 mt-2" x-text="'Deleting: ' + deletingCategory.name"></p>
+                        <p class="text-sm text-yellow-400 mt-2" x-show="deletingCategory.ads_count > 0">
+                            ⚠️ This category has <span x-text="deletingCategory.ads_count"></span> ads. Please reassign them first.
+                        </p>
+                    </div>
+                </template>
             </div>
             <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-700">
                 <button @click="showDeleteModal = false" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
