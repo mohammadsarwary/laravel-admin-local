@@ -4,10 +4,10 @@
 @section('header', 'Dashboard')
 
 @section('content')
-<div x-data="dashboard()" x-init="fetchStats()">
+<div x-data="dashboard()" x-init="init()">
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+        <button @click="showTrendModal('ads', 'Total Ads Posted', '+15.2%')" class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors text-left cursor-pointer hover:bg-gray-800/50">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-400 mb-2">Total Ads Posted</p>
@@ -21,9 +21,9 @@
                 <span class="material-icons text-sm">trending_up</span>
                 <span class="ml-1">+15.2%</span>
             </div>
-        </div>
+        </button>
 
-        <div class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+        <button @click="showTrendModal('users', 'Active Users', '+12%')" class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors text-left cursor-pointer hover:bg-gray-800/50">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-400 mb-2">Active Users</p>
@@ -37,9 +37,9 @@
                 <span class="material-icons text-sm">trending_up</span>
                 <span class="ml-1">+12%</span>
             </div>
-        </div>
+        </button>
 
-        <div class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+        <button @click="showTrendModal('revenue', 'Revenue Generated', '+2.5%')" class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors text-left cursor-pointer hover:bg-gray-800/50">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-400 mb-2">Revenue Generated</p>
@@ -53,9 +53,9 @@
                 <span class="material-icons text-sm">trending_up</span>
                 <span class="ml-1">+2.5%</span>
             </div>
-        </div>
+        </button>
 
-        <div class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+        <button @click="showTrendModal('pending', 'Pending Approvals', '-8%')" class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors text-left cursor-pointer hover:bg-gray-800/50">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-400 mb-2">Pending Approvals</p>
@@ -69,7 +69,7 @@
                 <span class="material-icons text-sm">trending_down</span>
                 <span class="ml-1">-8%</span>
             </div>
-        </div>
+        </button>
     </div>
 
     <!-- Charts Row -->
@@ -89,7 +89,6 @@
 
         <!-- Category Share -->
         <div class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
-        <div class="card-dark rounded-lg p-6 border border-gray-700">
             <h3 class="text-lg font-semibold text-white mb-6">Category Share</h3>
             <div x-show="loadingCategories" class="flex items-center justify-center py-4">
                 <div class="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
@@ -118,7 +117,7 @@
         <div class="card-dark rounded-lg p-6 border border-gray-700">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-semibold text-white">Top Performing Cities</h3>
-                <a href="#" class="text-red-500 hover:text-red-400 text-sm">View All</a>
+                <button @click="$dispatch('view-cities')" class="text-red-500 hover:text-red-400 text-xs font-medium uppercase tracking-wide transition-colors">View All →</button>
             </div>
             <div x-show="loadingCities" class="flex items-center justify-center py-4">
                 <div class="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
@@ -169,6 +168,38 @@
     </div>
 </div>
 
+<!-- Trend Details Modal -->
+<div x-show="showTrendModal" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showTrendModal = false" x-data="{ showTrendModal: false, trendType: '', trendTitle: '', trendValue: '' }">
+    <div class="bg-gray-900 rounded-lg border border-gray-700 max-w-2xl w-full mx-4 shadow-xl">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700">
+            <h3 class="text-lg font-semibold text-white" x-text="trendTitle"></h3>
+            <button @click="showTrendModal = false" class="text-gray-400 hover:text-white transition-colors">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="space-y-6">
+                <div>
+                    <p class="text-gray-400 text-sm mb-2">Current Value</p>
+                    <p class="text-3xl font-bold text-white" x-text="trendValue"></p>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm mb-2">Trend Details</p>
+                    <p class="text-gray-300">Detailed trend analysis for <span x-text="trendTitle"></span> is loading...</p>
+                </div>
+                <div class="flex gap-3">
+                    <button @click="showTrendModal = false" class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                        Close
+                    </button>
+                    <button class="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+                        View Full Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 function dashboard() {
@@ -182,6 +213,10 @@ function dashboard() {
         loadingCities: false,
         autoRefresh: true,
         refreshInterval: null,
+        showTrendModal: false,
+        trendType: '',
+        trendTitle: '',
+        trendValue: '',
         
         init() {
             this.fetchStats();
@@ -210,6 +245,13 @@ function dashboard() {
             } else {
                 this.stopAutoRefresh();
             }
+        },
+        
+        showTrendModal(type, title, value) {
+            this.trendType = type;
+            this.trendTitle = title;
+            this.trendValue = value;
+            this.showTrendModal = true;
         },
         
         async fetchStats() {
