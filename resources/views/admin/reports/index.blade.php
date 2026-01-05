@@ -52,6 +52,11 @@
                 <option value="user">User Reports</option>
                 <option value="message">Message Reports</option>
             </select>
+            
+            <button @click="fetchReports()" :disabled="loading" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                <span class="material-icons text-sm mr-1" :class="{ 'animate-spin': loading }">refresh</span>
+                Refresh
+            </button>
         </div>
     </div>
 
@@ -65,14 +70,40 @@
             </div>
         </div>
         
-        <table class="min-w-full divide-y divide-gray-200">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Report</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reporter</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('reason')">
+                        Report
+                        <span x-show="sortBy === 'reason'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('reported_type')">
+                        Type
+                        <span x-show="sortBy === 'reported_type'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('reporter_name')">
+                        Reporter
+                        <span x-show="sortBy === 'reporter_name'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('status')">
+                        Status
+                        <span x-show="sortBy === 'status'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('created_at')">
+                        Date
+                        <span x-show="sortBy === 'created_at'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
@@ -250,10 +281,20 @@ function reportManagement() {
         dateTo: '',
         status: '',
         type: '',
+        sortBy: 'created_at',
+        sortOrder: 'desc',
         showViewModal: false,
         viewReport: {},
         loading: false,
         error: '',
+        
+        init() {
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.showViewModal = false;
+                }
+            });
+        },
         
         async fetchReports() {
             this.loading = true;
@@ -265,7 +306,9 @@ function reportManagement() {
                     date_from: this.dateFrom,
                     date_to: this.dateTo,
                     status: this.status,
-                    type: this.type
+                    type: this.type,
+                    sort_by: this.sortBy,
+                    sort_order: this.sortOrder
                 });
                 
                 const response = await fetch(`/api/admin/reports?${params}`, {
@@ -284,6 +327,16 @@ function reportManagement() {
             } finally {
                 this.loading = false;
             }
+        },
+        
+        toggleSort(column) {
+            if (this.sortBy === column) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortBy = column;
+                this.sortOrder = 'asc';
+            }
+            this.fetchReports();
         },
         
         async resolveReport(id) {

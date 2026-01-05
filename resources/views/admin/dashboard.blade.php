@@ -75,7 +75,7 @@
     <!-- Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Ad Posting Trends -->
-        <div class="lg:col-span-2 card-dark rounded-lg p-6 border border-gray-700">
+        <div class="lg:col-span-2 card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-semibold text-white">Ad Posting Trends</h3>
                 <button class="text-gray-400 hover:text-white">
@@ -88,6 +88,7 @@
         </div>
 
         <!-- Category Share -->
+        <div class="card-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
         <div class="card-dark rounded-lg p-6 border border-gray-700">
             <h3 class="text-lg font-semibold text-white mb-6">Category Share</h3>
             <div x-show="loadingCategories" class="flex items-center justify-center py-4">
@@ -179,6 +180,37 @@ function dashboard() {
         loadingCategories: false,
         topCities: [],
         loadingCities: false,
+        autoRefresh: true,
+        refreshInterval: null,
+        
+        init() {
+            this.fetchStats();
+            this.startAutoRefresh();
+        },
+        
+        startAutoRefresh() {
+            if (this.autoRefresh) {
+                this.refreshInterval = setInterval(() => {
+                    this.fetchStats();
+                }, 60000); // Refresh every 60 seconds
+            }
+        },
+        
+        stopAutoRefresh() {
+            if (this.refreshInterval) {
+                clearInterval(this.refreshInterval);
+                this.refreshInterval = null;
+            }
+        },
+        
+        toggleAutoRefresh() {
+            this.autoRefresh = !this.autoRefresh;
+            if (this.autoRefresh) {
+                this.startAutoRefresh();
+            } else {
+                this.stopAutoRefresh();
+            }
+        },
         
         async fetchStats() {
             try {

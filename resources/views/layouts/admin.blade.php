@@ -41,7 +41,30 @@
     
     @stack('styles')
 </head>
-<body class="min-h-screen" x-data="{ sidebarOpen: true }">
+<body class="bg-gray-900 text-gray-100 antialiased" x-data="{ sidebarOpen: true, darkMode: true }" x-init="initDarkMode()">
+    <script>
+    function initDarkMode() {
+        this.darkMode = localStorage.getItem('darkMode') !== 'false';
+        this.applyDarkMode();
+    }
+    
+    function toggleDarkMode() {
+        this.darkMode = !this.darkMode;
+        localStorage.setItem('darkMode', this.darkMode);
+        this.applyDarkMode();
+    }
+    
+    function applyDarkMode() {
+        if (this.darkMode) {
+            document.body.classList.remove('bg-gray-100', 'text-gray-900');
+            document.body.classList.add('bg-gray-900', 'text-gray-100');
+        } else {
+            document.body.classList.remove('bg-gray-900', 'text-gray-100');
+            document.body.classList.add('bg-gray-100', 'text-gray-900');
+        }
+    }
+    </script>
+    
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside 
@@ -121,7 +144,15 @@
                         <h2 class="text-2xl font-semibold text-white">@yield('header', 'Dashboard')</h2>
                     </div>
                     
-                    <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-4">
+                        <button @click="toggleDarkMode()" class="p-2 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white transition-colors">
+                            <span class="material-icons" x-text="darkMode ? 'light_mode' : 'dark_mode'"></span>
+                        </button>
+                        
+                        <button @click="showHelpModal = true" class="p-2 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white transition-colors">
+                            <span class="material-icons">help_outline</span>
+                        </button>
+                        
                         <button class="text-gray-400 hover:text-white transition-colors">
                             <span class="material-icons">search</span>
                         </button>
@@ -180,6 +211,49 @@
     <!-- Toast Notifications -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
 
+    <!-- Help Modal -->
+    <div x-show="showHelpModal" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showHelpModal = false" x-data="{ showHelpModal: false }">
+        <div class="bg-gray-900 rounded-lg border border-gray-700 max-w-2xl w-full mx-4 shadow-xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700">
+                <h3 class="text-lg font-semibold text-white">Help & Documentation</h3>
+                <button @click="showHelpModal = false" class="text-gray-400 hover:text-white transition-colors">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-white font-semibold mb-2">Keyboard Shortcuts</h4>
+                        <ul class="text-gray-400 text-sm space-y-1">
+                            <li><kbd class="bg-gray-800 px-2 py-1 rounded">Escape</kbd> - Close modals</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-2">Navigation</h4>
+                        <ul class="text-gray-400 text-sm space-y-1">
+                            <li>Use the sidebar to navigate between pages</li>
+                            <li>Click on column headers to sort tables</li>
+                            <li>Use filters to narrow down results</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-2">Actions</h4>
+                        <ul class="text-gray-400 text-sm space-y-1">
+                            <li>Click "View" to see detailed information</li>
+                            <li>Click "Edit" to modify records</li>
+                            <li>Use "Export" to download data in various formats</li>
+                            <li>Use "Refresh" to reload data</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-2">Need More Help?</h4>
+                        <p class="text-gray-400 text-sm">Contact the development team or visit the documentation portal for detailed guides.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -220,6 +294,43 @@
         }, 3000);
     }
     </script>
+
+    <style>
+    @media print {
+        .sidebar,
+        .fixed.top-0.left-0,
+        .fixed.bottom-4.right-4,
+        button,
+        input[type="text"],
+        input[type="date"],
+        select,
+        .pagination,
+        .filters,
+        .actions {
+            display: none !important;
+        }
+        
+        main {
+            margin-left: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .card-dark,
+        .bg-white.rounded-lg.shadow {
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+        }
+        
+        table {
+            font-size: 10pt !important;
+        }
+        
+        body {
+            background: white !important;
+            color: black !important;
+        }
+    }
+    </style>
 
     @stack('scripts')
 </body>

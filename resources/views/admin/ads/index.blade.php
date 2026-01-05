@@ -47,9 +47,36 @@
                 <option value="rejected">Rejected</option>
             </select>
             
-            <button @click="exportAds()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                <span class="material-icons text-sm mr-1">download</span>
-                Export
+            <div x-data="{ exportOpen: false, format: 'csv' }" class="relative">
+                <button @click="exportOpen = !exportOpen" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    <span class="material-icons text-sm mr-1">download</span>
+                    Export
+                    <span class="material-icons text-sm ml-1">expand_more</span>
+                </button>
+                <div x-show="exportOpen" @click.away="exportOpen = false" x-transition class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                    <div class="p-2">
+                        <p class="text-xs text-gray-500 mb-2 px-2">Format</p>
+                        <button @click="format = 'csv'; exportAds(format); exportOpen = false" 
+                                class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors flex items-center">
+                            <span class="material-icons text-sm mr-2">description</span>
+                            CSV
+                        </button>
+                        <button @click="format = 'excel'; exportAds(format); exportOpen = false" 
+                                class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors flex items-center">
+                            <span class="material-icons text-sm mr-2">table_chart</span>
+                            Excel
+                        </button>
+                        <button @click="format = 'pdf'; exportAds(format); exportOpen = false" 
+                                class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors flex items-center">
+                            <span class="material-icons text-sm mr-2">picture_as_pdf</span>
+                            PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button @click="fetchAds()" :disabled="loading" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                <span class="material-icons text-sm mr-1" :class="{ 'animate-spin': loading }">refresh</span>
+                Refresh
             </button>
         </div>
     </div>
@@ -64,15 +91,46 @@
             </div>
         </div>
         
-        <table class="min-w-full divide-y divide-gray-200">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ad</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Views</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('title')">
+                        Ad
+                        <span x-show="sortBy === 'title'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('price')">
+                        Price
+                        <span x-show="sortBy === 'price'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('user_name')">
+                        User
+                        <span x-show="sortBy === 'user_name'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('status')">
+                        Status
+                        <span x-show="sortBy === 'status'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('views')">
+                        Views
+                        <span x-show="sortBy === 'views'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 transition-colors" @click="toggleSort('created_at')">
+                        Created
+                        <span x-show="sortBy === 'created_at'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
@@ -270,11 +328,21 @@ function adManagement() {
         dateFrom: '',
         dateTo: '',
         status: '',
+        sortBy: 'created_at',
+        sortOrder: 'desc',
         showViewModal: false,
         viewAd: {},
         viewModalLoading: false,
         loading: false,
         error: '',
+        
+        init() {
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.showViewModal = false;
+                }
+            });
+        },
         
         async fetchAds() {
             this.loading = true;
@@ -285,7 +353,9 @@ function adManagement() {
                     search: this.search,
                     date_from: this.dateFrom,
                     date_to: this.dateTo,
-                    status: this.status
+                    status: this.status,
+                    sort_by: this.sortBy,
+                    sort_order: this.sortOrder
                 });
                 
                 const response = await fetch(`/api/admin/ads?${params}`, {
@@ -304,6 +374,16 @@ function adManagement() {
             } finally {
                 this.loading = false;
             }
+        },
+        
+        toggleSort(column) {
+            if (this.sortBy === column) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortBy = column;
+                this.sortOrder = 'asc';
+            }
+            this.fetchAds();
         },
         
         async approveAd(id) {

@@ -10,10 +10,37 @@
         <div>
             <p class="text-gray-400 text-sm">View, search, and manage verified user accounts and marketplace sellers.</p>
         </div>
-        <div class="flex items-center space-x-3">
-            <button @click="exportUsers()" class="flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                <span class="material-icons text-sm">download</span>
-                <span>Export</span>
+        <div class="flex items-center space-x-4">
+            <div x-data="{ exportOpen: false, format: 'csv' }" class="relative">
+                <button @click="exportOpen = !exportOpen" class="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                    <span class="material-icons text-sm">download</span>
+                    <span>Export</span>
+                    <span class="material-icons text-sm">expand_more</span>
+                </button>
+                <div x-show="exportOpen" @click.away="exportOpen = false" x-transition class="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10">
+                    <div class="p-2">
+                        <p class="text-xs text-gray-400 mb-2 px-2">Format</p>
+                        <button @click="format = 'csv'; exportUsers(format); exportOpen = false" 
+                                class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 rounded transition-colors flex items-center">
+                            <span class="material-icons text-sm mr-2">description</span>
+                            CSV
+                        </button>
+                        <button @click="format = 'excel'; exportUsers(format); exportOpen = false" 
+                                class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 rounded transition-colors flex items-center">
+                            <span class="material-icons text-sm mr-2">table_chart</span>
+                            Excel
+                        </button>
+                        <button @click="format = 'pdf'; exportUsers(format); exportOpen = false" 
+                                class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 rounded transition-colors flex items-center">
+                            <span class="material-icons text-sm mr-2">picture_as_pdf</span>
+                            PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button @click="fetchUsers()" :disabled="loading" class="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50">
+                <span class="material-icons text-sm" :class="{ 'animate-spin': loading }">refresh</span>
+                <span>Refresh</span>
             </button>
             <button @click="showCreateModal = true" class="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
                 <span class="material-icons text-sm">add</span>
@@ -120,7 +147,8 @@
             </div>
         </div>
         
-        <table class="min-w-full divide-y divide-gray-700">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700">
             <thead class="bg-gray-800/50 border-b border-gray-700">
                 <tr>
                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -129,11 +157,36 @@
                                @change="toggleSelectAll()"
                                class="rounded">
                     </th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">User</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Contact Info</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Role</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Joined</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors" @click="toggleSort('name')">
+                        User
+                        <span x-show="sortBy === 'name'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors" @click="toggleSort('email')">
+                        Contact Info
+                        <span x-show="sortBy === 'email'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors" @click="toggleSort('role')">
+                        Role
+                        <span x-show="sortBy === 'role'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors" @click="toggleSort('is_active')">
+                        Status
+                        <span x-show="sortBy === 'is_active'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors" @click="toggleSort('created_at')">
+                        Joined
+                        <span x-show="sortBy === 'created_at'" class="ml-1">
+                            <span class="material-icons text-sm" x-text="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </span>
+                    </th>
                     <th class="px-6 py-4 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
@@ -513,6 +566,8 @@ function userManagement() {
         dateTo: '',
         status: '',
         role: '',
+        sortBy: 'created_at',
+        sortOrder: 'desc',
         showCreateModal: false,
         selectedItems: [],
         showViewModal: false,
@@ -522,6 +577,16 @@ function userManagement() {
         viewModalLoading: false,
         loading: false,
         error: '',
+        
+        init() {
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.showCreateModal = false;
+                    this.showViewModal = false;
+                    this.showEditModal = false;
+                }
+            });
+        },
         get allSelected() {
             return this.users.length > 0 && this.selectedItems.length === this.users.length;
         },
@@ -557,7 +622,9 @@ function userManagement() {
                     date_from: this.dateFrom,
                     date_to: this.dateTo,
                     status: this.status,
-                    role: this.role
+                    role: this.role,
+                    sort_by: this.sortBy,
+                    sort_order: this.sortOrder
                 });
                 
                 const response = await fetch(`/api/admin/users?${params}`, {
@@ -579,6 +646,16 @@ function userManagement() {
             }
         },
         
+        toggleSort(column) {
+            if (this.sortBy === column) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortBy = column;
+                this.sortOrder = 'asc';
+            }
+            this.fetchUsers();
+        },
+        
         async deleteUser(id) {
             if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
             try {
@@ -591,7 +668,7 @@ function userManagement() {
                 });
                 const data = await response.json();
                 if (data.success) {
-                    showToast('User deleted successfully');
+                    showToast('User deleted successfully', 'success');
                     this.fetchUsers();
                 } else {
                     this.error = data.message || 'Failed to delete user';
@@ -599,6 +676,28 @@ function userManagement() {
             } catch (error) {
                 console.error('Error:', error);
                 this.error = 'An error occurred while deleting the user';
+            }
+        },
+        
+        async undoDelete(id) {
+            try {
+                const response = await fetch(`/api/admin/users/${id}/undo`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('User restored successfully', 'success');
+                    this.fetchUsers();
+                } else {
+                    showToast('Failed to restore user', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('An error occurred while restoring the user', 'error');
             }
         },
         
