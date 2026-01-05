@@ -111,6 +111,12 @@
                     Management
                 </div>
                 
+                <a href="{{ route('admin.web.categories') }}" 
+                   class="flex items-center px-4 py-3 mx-2 rounded-lg transition-colors {{ request()->routeIs('admin.web.categories') ? 'bg-red-500 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                    <span class="material-icons text-xl">category</span>
+                    <span class="ml-3" x-show="sidebarOpen">Categories</span>
+                </a>
+                
                 <a href="{{ route('admin.web.reports') }}" 
                    class="flex items-center px-4 py-3 mx-2 rounded-lg transition-colors {{ request()->routeIs('admin.web.reports') ? 'bg-red-500 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                     <span class="material-icons text-xl">flag</span>

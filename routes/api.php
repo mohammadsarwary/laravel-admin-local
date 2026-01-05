@@ -100,6 +100,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/reports/{report}/dismiss', [Admin\ReportController::class, 'dismiss'])->name('reports.dismiss');
         Route::post('/reports/{report}/action', [Admin\ReportController::class, 'takeAction'])->name('reports.takeAction');
 
+        // Category Management
+        Route::get('/categories', [Admin\CategoryController::class, 'index'])->name('categories.index');
+        Route::get('/categories/export', [Admin\CategoryController::class, 'export'])->name('categories.export');
+        Route::post('/categories', [Admin\CategoryController::class, 'store'])->name('categories.store');
+        Route::post('/categories/bulk-action', [Admin\CategoryController::class, 'bulkAction'])->name('categories.bulkAction');
+        Route::get('/categories/{category}', [Admin\CategoryController::class, 'show'])->name('categories.show');
+        Route::put('/categories/{category}', [Admin\CategoryController::class, 'update'])->name('categories.update');
+        Route::put('/categories/{category}/toggle-status', [Admin\CategoryController::class, 'toggleStatus'])->name('categories.toggleStatus');
+        Route::delete('/categories/{category}', [Admin\CategoryController::class, 'destroy'])->name('categories.destroy');
+
         // Analytics
         Route::get('/analytics/users', [Admin\AnalyticsController::class, 'users'])->name('analytics.users');
         Route::get('/analytics/ads', [Admin\AnalyticsController::class, 'ads'])->name('analytics.ads');
