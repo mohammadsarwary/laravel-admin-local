@@ -75,4 +75,8 @@ Route::prefix('admin')->name('admin.web.')->middleware(['web', 'admin.session'])
     Route::get('/moderation', function () {
         return view('admin.moderation');
     })->name('moderation');
+
+    Route::get('/advertisements', function () {
+        return view('admin.advertisements.index');
+    })->name('advertisements');
 });

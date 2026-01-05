@@ -101,6 +101,12 @@
                     <span class="ml-3" x-show="sidebarOpen">Listings</span>
                 </a>
                 
+                <a href="{{ route('admin.web.advertisements') }}" 
+                   class="flex items-center px-4 py-3 mx-2 rounded-lg transition-colors {{ request()->routeIs('admin.web.advertisements') ? 'bg-red-500 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                    <span class="material-icons text-xl">campaign</span>
+                    <span class="ml-3" x-show="sidebarOpen">Advertisements</span>
+                </a>
+                
                 <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6" x-show="sidebarOpen">
                     Management
                 </div>
