@@ -17,9 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.session' => \App\Http\Middleware\AdminSessionMiddleware::class,
         ]);
 
-        // Exclude admin API routes from CSRF verification (uses token-based auth)
+        // Exclude API routes from CSRF verification (uses token-based auth)
         $middleware->validateCsrfTokens(except: [
-            'api/admin/*',
+            'api/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
