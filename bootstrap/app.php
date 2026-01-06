@@ -17,8 +17,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.session' => \App\Http\Middleware\AdminSessionMiddleware::class,
         ]);
 
-        $middleware->statefulApi();
-        
         // Exclude admin login from CSRF verification
         $middleware->validateCsrfTokens(except: [
             'api/admin/login',
