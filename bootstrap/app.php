@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
+
+        // Log all API requests
+        $middleware->append(\Illuminate\Logging\LogHttpRequests::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
