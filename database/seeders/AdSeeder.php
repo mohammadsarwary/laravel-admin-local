@@ -291,7 +291,7 @@ class AdSeeder extends Seeder
                 for ($i = 0; $i < $numImages; $i++) {
                     AdImage::create([
                         'ad_id' => $ad->id,
-                        'image_url' => "https://source.unsplash.com/800x600/?{$imageKeywords}&sig={$ad->id}{$i}",
+                        'image_url' => "https://loremflickr.com/800/600/{$imageKeywords}?random={$ad->id}{$i}",
                         'display_order' => $i,
                         'is_primary' => $i === 0,
                     ]);
@@ -307,17 +307,17 @@ class AdSeeder extends Seeder
     private function getImageKeywords(string $categorySlug): string
     {
         return match ($categorySlug) {
-            'electronics' => 'electronics,gadget,technology',
-            'vehicles' => 'car,motorcycle,vehicle',
-            'property' => 'house,apartment,interior',
-            'fashion' => 'clothing,fashion,style',
-            'home-garden' => 'furniture,home,decor',
-            'sports' => 'sports,fitness,equipment',
-            'books' => 'books,library,reading',
-            'pets' => 'pet,animal,dog',
-            'jobs' => 'office,work,business',
-            'services' => 'service,professional,cleaning',
-            default => 'product,item',
+            'electronics' => 'electronics,technology',
+            'vehicles' => 'car,vehicle',
+            'property' => 'house,building',
+            'fashion' => 'clothing,fashion',
+            'home-garden' => 'furniture,home',
+            'sports' => 'sports,equipment',
+            'books' => 'book,library',
+            'pets' => 'dog,animal',
+            'jobs' => 'office,business',
+            'services' => 'professional,service',
+            default => 'product',
         };
     }
 }
