@@ -83,7 +83,7 @@ class AdSeeder extends Seeder
                 'title' => 'Harley-Davidson Iron 883',
                 'description' => '2020 Harley-Davidson Iron 883, 5,000 miles. Custom exhaust, LED lights, garage kept.',
                 'price' => 8500.00,
-                'condition' => 'excellent',
+                'condition' => 'like_new', // Must match enum: new, like_new, good, fair, poor
                 'location' => 'Denver, CO',
                 'category_slug' => 'vehicles',
             ],
