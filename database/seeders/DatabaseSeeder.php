@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
+    // NOTE: After adding new seeder classes, run: composer dump-autoload
     public function run(): void
     {
         $this->call([
