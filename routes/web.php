@@ -92,4 +92,8 @@ Route::prefix('admin')->name('admin.web.')->middleware(['web', 'admin.session'])
     Route::get('/categories', function () {
         return view('admin.categories.index');
     })->name('categories');
+
+    Route::get('/sliders', function () {
+        return view('admin.sliders.index');
+    })->name('sliders');
 });
