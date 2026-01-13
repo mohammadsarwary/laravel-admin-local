@@ -3,8 +3,10 @@
 use App\Http\Controllers\Api\AdController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\SliderController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\Admin\SliderController as AdminSliderController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,6 +23,9 @@ Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.r
 Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
 
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+
+Route::get('/sliders', [SliderController::class, 'index'])->name('sliders.index');
+Route::get('/sliders/{slider}', [SliderController::class, 'show'])->name('sliders.show');
 
 Route::get('/ads', [AdController::class, 'index'])->name('ads.index');
 Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
@@ -109,6 +114,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/categories/{category}', [Admin\CategoryController::class, 'update'])->name('categories.update');
         Route::put('/categories/{category}/toggle-status', [Admin\CategoryController::class, 'toggleStatus'])->name('categories.toggleStatus');
         Route::delete('/categories/{category}', [Admin\CategoryController::class, 'destroy'])->name('categories.destroy');
+
+        // Slider Management
+        Route::get('/sliders', [AdminSliderController::class, 'index'])->name('sliders.index');
+        Route::post('/sliders', [AdminSliderController::class, 'store'])->name('sliders.store');
+        Route::post('/sliders/bulk-action', [AdminSliderController::class, 'bulkAction'])->name('sliders.bulkAction');
+        Route::get('/sliders/{slider}', [AdminSliderController::class, 'show'])->name('sliders.show');
+        Route::put('/sliders/{slider}', [AdminSliderController::class, 'update'])->name('sliders.update');
+        Route::put('/sliders/{slider}/toggle-status', [AdminSliderController::class, 'toggleStatus'])->name('sliders.toggleStatus');
+        Route::delete('/sliders/{slider}', [AdminSliderController::class, 'destroy'])->name('sliders.destroy');
 
         // Analytics
         Route::get('/analytics/users', [Admin\AnalyticsController::class, 'users'])->name('analytics.users');

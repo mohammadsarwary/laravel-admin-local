@@ -200,6 +200,8 @@
                 name: 'Public - Data',
                 endpoints: [
                     { method: 'GET', path: '/api/categories', description: 'List all active categories', auth: false },
+                    { method: 'GET', path: '/api/sliders', description: 'List all active sliders', auth: false },
+                    { method: 'GET', path: '/api/sliders/{slider}', description: 'Get single slider details', auth: false },
                     { method: 'GET', path: '/api/ads', description: 'List all ads (public)', auth: false },
                     { method: 'GET', path: '/api/ads/{ad}', description: 'Get single ad details', auth: false },
                     { method: 'GET', path: '/api/users/{user}', description: 'Get user profile', auth: false },
@@ -301,6 +303,18 @@
                     { method: 'PUT', path: '/api/admin/categories/{category}', description: 'Update category', auth: true },
                     { method: 'PUT', path: '/api/admin/categories/{category}/toggle-status', description: 'Toggle category active status', auth: true },
                     { method: 'DELETE', path: '/api/admin/categories/{category}', description: 'Delete category', auth: true },
+                ]
+            },
+            {
+                name: 'Admin - Sliders',
+                endpoints: [
+                    { method: 'GET', path: '/api/admin/sliders', description: 'List all sliders with pagination', auth: true },
+                    { method: 'POST', path: '/api/admin/sliders', description: 'Create new slider', auth: true },
+                    { method: 'POST', path: '/api/admin/sliders/bulk-action', description: 'Bulk actions (activate, deactivate, delete)', auth: true },
+                    { method: 'GET', path: '/api/admin/sliders/{slider}', description: 'Get slider details', auth: true },
+                    { method: 'PUT', path: '/api/admin/sliders/{slider}', description: 'Update slider', auth: true },
+                    { method: 'PUT', path: '/api/admin/sliders/{slider}/toggle-status', description: 'Toggle slider active status', auth: true },
+                    { method: 'DELETE', path: '/api/admin/sliders/{slider}', description: 'Delete slider', auth: true },
                 ]
             },
             {
