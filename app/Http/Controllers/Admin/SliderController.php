@@ -34,11 +34,15 @@ class SliderController extends Controller
             ->orderByDesc('created_at')
             ->paginate($limit, ['*'], 'page', $page);
 
+        // NOTE: Frontend expects pagination nested under 'pagination' key with: total, pages, current_page, per_page
         return $this->success([
             'sliders' => $sliders->items(),
-            'page' => $sliders->currentPage(),
-            'limit' => $sliders->perPage(),
-            'total' => $sliders->total(),
+            'pagination' => [
+                'total' => $sliders->total(),
+                'pages' => $sliders->lastPage(),
+                'current_page' => $sliders->currentPage(),
+                'per_page' => $sliders->perPage(),
+            ],
         ]);
     }
 
