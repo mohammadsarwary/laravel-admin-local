@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Ad;
+use App\Models\AdImage;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -270,7 +271,7 @@ class AdSeeder extends Seeder
             $user = $users->random();
 
             if ($category) {
-                Ad::create([
+                $ad = Ad::create([
                     'user_id' => $user->id,
                     'category_id' => $category->id,
                     'title' => $adData['title'],
@@ -283,10 +284,40 @@ class AdSeeder extends Seeder
                     'favorites' => rand(0, 50),
                 ]);
 
+                // Create images for the ad
+                $imageKeywords = $this->getImageKeywords($adData['category_slug']);
+                $numImages = rand(1, 4);
+
+                for ($i = 0; $i < $numImages; $i++) {
+                    AdImage::create([
+                        'ad_id' => $ad->id,
+                        'image_url' => "https://source.unsplash.com/800x600/?{$imageKeywords}&sig={$ad->id}{$i}",
+                        'display_order' => $i,
+                        'is_primary' => $i === 0,
+                    ]);
+                }
+
                 $user->incrementStat('active_listings');
             }
         }
 
         $this->command->info('AdSeeder completed successfully.');
+    }
+
+    private function getImageKeywords(string $categorySlug): string
+    {
+        return match ($categorySlug) {
+            'electronics' => 'electronics,gadget,technology',
+            'vehicles' => 'car,motorcycle,vehicle',
+            'property' => 'house,apartment,interior',
+            'fashion' => 'clothing,fashion,style',
+            'home-garden' => 'furniture,home,decor',
+            'sports' => 'sports,fitness,equipment',
+            'books' => 'books,library,reading',
+            'pets' => 'pet,animal,dog',
+            'jobs' => 'office,work,business',
+            'services' => 'service,professional,cleaning',
+            default => 'product,item',
+        };
     }
 }
