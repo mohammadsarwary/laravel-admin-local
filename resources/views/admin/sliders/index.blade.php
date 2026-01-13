@@ -450,7 +450,7 @@
     </div>
 </div>
 
-@push('scripts')
+<!-- NOTE: Script must be defined inline before Alpine initialization, not in @push('scripts') -->
 <script>
 function sliderManagement() {
     return {
@@ -770,4 +770,3 @@ function sliderManagement() {
     };
 }
 </script>
-@endpush
