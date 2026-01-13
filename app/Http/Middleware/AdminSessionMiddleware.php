@@ -17,17 +17,24 @@ class AdminSessionMiddleware
         if ($token) {
             // Verify token and authenticate user
             $personalAccessToken = PersonalAccessToken::findToken($token);
-            
+
             if ($personalAccessToken && $personalAccessToken->tokenable) {
+                // Check if token has expired
+                if ($personalAccessToken->expires_at && $personalAccessToken->expires_at->isPast()) {
+                    // Token expired, clear session and redirect to login
+                    $request->session()->forget(['admin_token', 'admin_user_id']);
+                    return redirect()->route('login')->with('error', 'Your session has expired. Please login again.');
+                }
+
                 $user = $personalAccessToken->tokenable;
-                
+
                 // Check if user is admin and active
                 if ($user->is_admin && $user->is_active) {
                     // Set the user on the request
                     $request->setUserResolver(function () use ($user) {
                         return $user;
                     });
-                    
+
                     return $next($request);
                 }
             }
