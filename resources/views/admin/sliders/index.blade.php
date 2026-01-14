@@ -4,7 +4,7 @@
 @section('header', 'Sliders')
 
 @section('content')
-<div x-data="sliderManagement()" x-init="fetchSliders()">
+<div x-data="sliderManagement" @alpine:init="fetchSliders()">
     <!-- Header with Actions -->
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -450,10 +450,10 @@
     </div>
 </div>
 
-<!-- NOTE: Script must be defined inline before Alpine initialization, not in @push('scripts') -->
+<!-- NOTE: Defer Alpine initialization until Alpine is loaded -->
 <script>
-function sliderManagement() {
-    return {
+document.addEventListener('alpine:init', () => {
+    Alpine.data('sliderManagement', () => ({
         sliders: [],
         stats: { total: 0, active: 0, inactive: 0, homepage: 0 },
         pagination: {},
@@ -767,6 +767,6 @@ function sliderManagement() {
                 minute: '2-digit'
             });
         }
-    };
-}
+    }));
+});
 </script>
