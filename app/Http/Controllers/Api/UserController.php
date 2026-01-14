@@ -150,6 +150,7 @@ class UserController extends Controller
                 'price' => $ad->price,
                 'location' => $ad->location,
                 'condition' => $ad->condition,
+                'status' => $ad->status,
                 'views' => $ad->views,
                 'category_name' => $ad->category?->name,
                 'primary_image' => $ad->primaryImage?->image_url,
