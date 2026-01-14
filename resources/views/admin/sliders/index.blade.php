@@ -95,7 +95,7 @@
     </div>
 
     <!-- Sliders Table -->
-    <div class="card-dark rounded-lg border border-gray-700 overflow-hidden relative">
+    <div class="card-dark rounded-lg border border-gray-700 overflow-hidden relative w-full">
         <!-- Loading Overlay -->
         <div x-show="loading" class="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-10">
             <div class="flex flex-col items-center">
@@ -104,7 +104,7 @@
             </div>
         </div>
         
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto w-full">
             <table class="min-w-full divide-y divide-gray-700">
                 <thead class="bg-gray-800">
                     <tr>

@@ -20,12 +20,20 @@
     
     <style>
         [x-cloak] { display: none !important; }
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
         body {
             background: #1a1a1a;
             color: #e0e0e0;
         }
         .sidebar-bg {
             background: linear-gradient(135deg, #2d2d2d 0%, #1f1f1f 100%);
+            flex-shrink: 0;
         }
         .card-dark {
             background: #2a2a2a;
