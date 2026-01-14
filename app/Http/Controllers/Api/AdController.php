@@ -121,7 +121,7 @@ class AdController extends Controller
             'title' => trim($request->title),
             'description' => trim($request->description),
             'price' => $request->price,
-            'condition' => $request->condition ?? 'good',
+            'condition' => $request->condition ?? AdCondition::GOOD->value,
             'location' => trim($request->location),
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,

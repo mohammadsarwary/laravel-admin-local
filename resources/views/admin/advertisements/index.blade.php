@@ -759,7 +759,7 @@ function advertisementManagement() {
                 formData.append('category_id', this.form.category_id);
                 formData.append('status', this.form.status);
                 formData.append('price', this.form.price || 0);
-                formData.append('condition', 'new');
+                formData.append('condition', this.form.condition || 'good');
                 formData.append('location', 'Admin Created');
                 
                 if (this.form.imageFile) {

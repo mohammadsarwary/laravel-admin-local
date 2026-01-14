@@ -78,7 +78,7 @@ Schema::create('ads', function (Blueprint $table) {
     $table->string('title', 200);
     $table->text('description');
     $table->decimal('price', 10, 2);
-    $table->enum('condition', ['new', 'like_new', 'good', 'fair', 'poor'])->default('good');
+    $table->enum('condition', ['new', 'like_new', 'good', 'fair', 'poor'])->default('good'); // See App\Enums\AdCondition
     $table->string('location', 100);
     $table->decimal('latitude', 10, 8)->nullable();
     $table->decimal('longitude', 11, 8)->nullable();

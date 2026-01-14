@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('title', 200);
             $table->text('description');
             $table->decimal('price', 10, 2);
-            $table->enum('condition', ['new', 'like_new', 'good', 'fair', 'poor'])->default('good');
+            $table->enum('condition', ['new', 'like_new', 'good', 'fair', 'poor'])->default('good')->comment('See App\Enums\AdCondition');
             $table->string('location', 100);
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();
