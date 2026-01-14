@@ -25,15 +25,26 @@
             width: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;
         }
         body {
             background: #1a1a1a;
             color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+        body > div.flex {
+            flex: 1;
+            min-height: 0;
         }
         .sidebar-bg {
             background: linear-gradient(135deg, #2d2d2d 0%, #1f1f1f 100%);
             flex-shrink: 0;
+            width: 16rem;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        .sidebar-bg.w-20 {
+            width: 5rem;
         }
         .card-dark {
             background: #2a2a2a;
