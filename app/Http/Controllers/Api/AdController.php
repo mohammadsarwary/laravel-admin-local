@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\AdCondition;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ad\StoreAdRequest;
 use App\Http\Requests\Ad\UpdateAdRequest;
@@ -58,6 +59,13 @@ class AdController extends Controller
             'page' => $ads->currentPage(),
             'limit' => $ads->perPage(),
             'total' => $ads->total(),
+        ]);
+    }
+
+    public function conditions(): JsonResponse
+    {
+        return $this->success([
+            'conditions' => AdCondition::options(),
         ]);
     }
 

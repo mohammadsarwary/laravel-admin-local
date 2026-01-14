@@ -239,6 +239,7 @@
                         endpoints: [
                             { method: 'GET', path: '/api/categories', description: 'List all active categories', auth: false },
                             { method: 'GET', path: '/api/ads', description: 'List all ads (public)', auth: false },
+                            { method: 'GET', path: '/api/ads/conditions', description: 'Get available ad conditions', auth: false },
                             { method: 'GET', path: '/api/ads/{ad}', description: 'Get single ad details', auth: false },
                             { method: 'GET', path: '/api/users/{user}', description: 'Get user profile', auth: false },
                             { method: 'GET', path: '/api/users/{user}/ads', description: 'Get user\'s ads', auth: false },

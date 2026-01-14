@@ -103,13 +103,37 @@ class AdController extends Controller
         ]);
     }
 
+    public function update(Request $request, Ad $ad): JsonResponse
+    {
+        // Delete specified images
+        if ($request->has('images_to_delete') && is_array($request->images_to_delete)) {
+            $ad->images()->whereIn('id', $request->images_to_delete)->delete();
+        }
+
+        // Update ad fields
+        $ad->update($request->only([
+            'title', 'description', 'price', 'category_id', 'status'
+        ]));
+
+        AdminLog::log($request->user(), 'update_ad', $ad->id, 'ad', 'Ad updated');
+
+        return $this->success(null, 'Ad updated successfully');
+    }
+
     public function approve(Request $request, Ad $ad): JsonResponse
     {
-        $ad->approve();
+        // Accept status parameter to support toggle between active/inactive
+        $status = $request->get('status', 'active');
 
-        AdminLog::log($request->user(), 'approve_ad', $ad->id, 'ad', 'Ad approved');
+        if ($status === 'active') {
+            $ad->approve();
+            AdminLog::log($request->user(), 'approve_ad', $ad->id, 'ad', 'Ad approved');
+        } else {
+            $ad->update(['status' => $status]);
+            AdminLog::log($request->user(), 'update_ad_status', $ad->id, 'ad', "Ad status changed to {$status}");
+        }
 
-        return $this->success(null, 'Ad approved successfully');
+        return $this->success(null, "Ad status updated to {$status}");
     }
 
     public function reject(Request $request, Ad $ad): JsonResponse

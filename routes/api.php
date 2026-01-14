@@ -28,6 +28,7 @@ Route::get('/sliders', [SliderController::class, 'index'])->name('sliders.index'
 Route::get('/sliders/{slider}', [SliderController::class, 'show'])->name('sliders.show');
 
 Route::get('/ads', [AdController::class, 'index'])->name('ads.index');
+Route::get('/ads/conditions', [AdController::class, 'conditions'])->name('ads.conditions');
 Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
 
 Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
@@ -92,6 +93,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/ads/export', [Admin\AdController::class, 'export'])->name('ads.export');
         Route::post('/ads/bulk-action', [Admin\AdController::class, 'bulkAction'])->name('ads.bulkAction');
         Route::get('/ads/{ad}', [Admin\AdController::class, 'show'])->name('ads.show');
+        Route::put('/ads/{ad}', [Admin\AdController::class, 'update'])->name('ads.update');
         Route::put('/ads/{ad}/approve', [Admin\AdController::class, 'approve'])->name('ads.approve');
         Route::put('/ads/{ad}/reject', [Admin\AdController::class, 'reject'])->name('ads.reject');
         Route::put('/ads/{ad}/feature', [Admin\AdController::class, 'feature'])->name('ads.feature');

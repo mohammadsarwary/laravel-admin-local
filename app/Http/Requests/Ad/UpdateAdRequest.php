@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Ad;
 
+use App\Enums\AdCondition;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateAdRequest extends FormRequest
@@ -20,7 +21,7 @@ class UpdateAdRequest extends FormRequest
             'price' => ['sometimes', 'numeric', 'min:0'],
             'category_id' => ['sometimes', 'integer', 'exists:categories,id'],
             'location' => ['sometimes', 'string', 'max:100'],
-            'condition' => ['sometimes', 'string', 'in:new,like_new,good,fair,poor'],
+            'condition' => ['sometimes', 'string', 'in:' . AdCondition::values()],
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Ad;
 
+use App\Enums\AdCondition;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAdRequest extends FormRequest
@@ -19,7 +20,7 @@ class StoreAdRequest extends FormRequest
             'price' => ['required', 'numeric', 'min:0'],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'location' => ['required', 'string', 'max:100'],
-            'condition' => ['nullable', 'string', 'in:new,like_new,good,fair,poor'],
+            'condition' => ['nullable', 'string', 'in:' . AdCondition::values()],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];

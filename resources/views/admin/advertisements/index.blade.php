@@ -292,9 +292,24 @@
                     <p x-show="formErrors.category_id" class="text-red-400 text-xs mt-1" x-text="formErrors.category_id"></p>
                 </div>
                 
+                <!-- Existing Images -->
+                <div x-show="showEditModal && form.existingImages.length > 0" class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Existing Images</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <template x-for="image in form.existingImages" :key="image.id">
+                            <div class="relative group">
+                                <img :src="image.image_url" class="w-full h-24 object-cover rounded-lg border border-gray-700">
+                                <button @click="deleteImage(image.id)" class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="material-icons text-sm">close</span>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
                 <!-- Image Upload -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Advertisement Image</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Add New Image</label>
                     <div class="flex items-center space-x-4">
                         <input type="file"
                                @change="handleImageUpload($event)"
@@ -400,7 +415,7 @@
                         <div class="grid grid-cols-3 gap-2">
                             <template x-for="(image, index) in selectedAd.images" :key="index">
                                 <div class="aspect-square bg-gray-800 rounded-lg overflow-hidden">
-                                    <img :src="image.url" :alt="image.alt || 'Advertisement image'" class="w-full h-full object-cover">
+                                    <img :src="image.image_url" :alt="image.alt || 'Advertisement image'" class="w-full h-full object-cover">
                                 </div>
                             </template>
                         </div>
@@ -524,7 +539,9 @@ function advertisementManagement() {
             category_id: '',
             status: 'active',
             price: '',
-            imageFile: null
+            imageFile: null,
+            existingImages: [],
+            imagesToDelete: []
         },
         formErrors: {},
         formLoading: false,
@@ -619,14 +636,32 @@ function advertisementManagement() {
             this.showCreateModal = true;
         },
         
-        editAdvertisement(ad) {
-            this.form.title = ad.title;
-            this.form.description = ad.description;
-            this.form.category_id = ad.category_id;
-            this.form.status = ad.status;
-            this.form.price = ad.price;
+        async editAdvertisement(ad) {
             this.selectedAd = ad;
             this.showEditModal = true;
+
+            try {
+                const response = await fetch(`/api/admin/ads/${ad.id}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const adData = data.data;
+                    this.form.title = adData.title;
+                    this.form.description = adData.description;
+                    this.form.category_id = adData.category_id;
+                    this.form.status = adData.status;
+                    this.form.price = adData.price;
+                    this.form.existingImages = adData.images || [];
+                    this.selectedAd = adData;
+                }
+            } catch (error) {
+                console.error('Error fetching advertisement details:', error);
+                window.showToast('Failed to load advertisement details', 'error');
+            }
         },
         
         async viewAdvertisement(ad) {
@@ -748,7 +783,8 @@ function advertisementManagement() {
                         description: this.form.description,
                         category_id: this.form.category_id,
                         status: this.form.status,
-                        price: this.form.price
+                        price: this.form.price,
+                        images_to_delete: this.form.imagesToDelete
                     }) : formData
                 });
                 
@@ -805,11 +841,18 @@ function advertisementManagement() {
                 category_id: '',
                 status: 'active',
                 price: '',
-                imageFile: null
+                imageFile: null,
+                existingImages: [],
+                imagesToDelete: []
             };
             this.formErrors = {};
             this.imagePreview = null;
             this.selectedAd = null;
+        },
+
+        deleteImage(imageId) {
+            this.form.existingImages = this.form.existingImages.filter(img => img.id !== imageId);
+            this.form.imagesToDelete.push(imageId);
         },
         
         exportAdvertisements(format) {
