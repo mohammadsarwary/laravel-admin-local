@@ -65,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/login', [Admin\AuthController::class, 'login'])->name('login');
 
+    // Allow both Sanctum token auth and session auth for admin routes
     Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         // Auth
         Route::get('/verify', [Admin\AuthController::class, 'verify'])->name('verify');

@@ -273,6 +273,15 @@
     </div>
 
     <script>
+    // Initialize admin token from session to localStorage for API calls
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = '{{ session("admin_token") }}';
+        if (token && token !== '') {
+            localStorage.setItem('admin_token', token);
+            sessionStorage.setItem('admin_token', token);
+        }
+    });
+    
     // Global date formatting function for consistent date display across all admin pages
     function formatDate(dateString, includeTime = false) {
         if (!dateString) return 'N/A';

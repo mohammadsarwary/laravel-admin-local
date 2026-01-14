@@ -4,7 +4,7 @@
 @section('header', 'Sliders')
 
 @section('content')
-<div x-data="sliderManagement" @alpine:init="fetchSliders()">
+<div x-data="sliderManagement" x-init="$nextTick(() => fetchSliders())">
     <!-- Header with Actions -->
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -505,15 +505,19 @@ document.addEventListener('alpine:init', () => {
                     sort_order: this.sortOrder
                 });
                 
+                // Get token from session storage (set by admin middleware)
+                const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
                 const response = await fetch(`/api/admin/sliders?${params}`, {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': token ? `Bearer ${token}` : '',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                         'Accept': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
                 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch sliders');
+                    throw new Error(`HTTP ${response.status}: Failed to fetch sliders`);
                 }
                 
                 const data = await response.json();
@@ -572,13 +576,16 @@ document.addEventListener('alpine:init', () => {
             if (!confirm(`Are you sure you want to ${action} ${this.selectedSliders.length} sliders?`)) return;
             
             try {
+                const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
                 const response = await fetch('/api/admin/sliders/bulk-action', {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': token ? `Bearer ${token}` : '',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify({
                         action: action,
                         slider_ids: this.selectedSliders
@@ -626,6 +633,7 @@ document.addEventListener('alpine:init', () => {
             this.formErrors = {};
             
             try {
+                const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
                 const url = this.showEditModal 
                     ? `/api/admin/sliders/${this.form.id}`
                     : '/api/admin/sliders';
@@ -635,10 +643,12 @@ document.addEventListener('alpine:init', () => {
                 const response = await fetch(url, {
                     method: method,
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': token ? `Bearer ${token}` : '',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(this.form)
                 });
                 
@@ -675,12 +685,15 @@ document.addEventListener('alpine:init', () => {
         
         async toggleStatus(slider) {
             try {
+                const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
                 const response = await fetch(`/api/admin/sliders/${slider.id}/toggle-status`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': token ? `Bearer ${token}` : '',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                         'Accept': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
                 
                 const data = await response.json();
@@ -703,12 +716,15 @@ document.addEventListener('alpine:init', () => {
         async confirmDelete() {
             this.formLoading = true;
             try {
+                const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
                 const response = await fetch(`/api/admin/sliders/${this.deletingSliderId}`, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token'),
+                        'Authorization': token ? `Bearer ${token}` : '',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                         'Accept': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
                 
                 const data = await response.json();
